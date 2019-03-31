@@ -2,37 +2,37 @@ const config = require('config')
 const mysql = require('mysql')
 
 module.exports = class BaseRepository {
-  constructor() {
+  constructor () {
     this.connection = mysql.createConnection({
-      host     : config.db.host,
-      user     : config.db.user,
-      password : config.db.password,
-      database : config.db.database,
+      host: config.db.host,
+      user: config.db.user,
+      password: config.db.password,
+      database: config.db.database,
       port: config.db.port
     })
   }
 
-  end() {
+  end () {
     this.connection.end()
   }
 
-  async create() {
+  async create () {
     throw new Error('Method not implemented.')
   }
 
-  async update() {
+  async update () {
     throw new Error('Method not implemented.')
   }
 
-  async delete() {
+  async delete () {
     throw new Error('Method not implemented.')
   }
 
-  async find() {
+  async find () {
     throw new Error('Method not implemented.')
   }
 
-  async findOne() {
+  async findOne () {
     throw new Error('Method not implemented.')
   }
 }

@@ -1,11 +1,11 @@
 const BaseRepository = require('./base_repository')
 
 module.exports = class ArticlesRepository extends BaseRepository {
-  constructor() {
+  constructor () {
     super()
   }
 
-  async create(article) {
+  async create (article) {
     const sql = `
       INSERT INTO
         articles

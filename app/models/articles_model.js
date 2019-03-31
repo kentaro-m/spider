@@ -1,16 +1,15 @@
-const uuidv4 = require('uuid/v4');
-const moment = require('moment');
+const uuidv4 = require('uuid/v4')
+const moment = require('moment')
 const ArticlesRepositry = require('../repositories/articles_repository')
 const ArticleEntity = require('../entities/article_entity')
 const { getArticles } = require('../lib/utils')
 const config = require('config')
 
 module.exports = class ArticlesModel {
-
-  constructor() {
+  constructor () {
   }
 
-  async add() {
+  async add () {
     try {
       const articlesRepositry = new ArticlesRepositry()
 
@@ -33,7 +32,7 @@ module.exports = class ArticlesModel {
     }
   }
 
-  async get() {
+  async get () {
 
   }
 }
