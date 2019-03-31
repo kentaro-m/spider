@@ -1,0 +1,13 @@
+{
+  "db": {
+    "host": "db",
+    "user": "root",
+    "password": "mysql",
+    "database": "spiderdb",
+    "port": 3306
+  },
+  "feedUrls": [
+    "https://inside.dmm.com/rss",
+    "https://blog.kentarom.com/rss.xml"
+  ]
+}
