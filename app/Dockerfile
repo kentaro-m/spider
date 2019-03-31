@@ -2,6 +2,6 @@ FROM node:10
 
 WORKDIR /src
 COPY . /src
-RUN npm install --production
+RUN npm install
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
