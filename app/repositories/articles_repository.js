@@ -13,14 +13,18 @@ module.exports = class ArticlesRepository extends BaseRepository {
         id = ?,
         title = ?,
         url = ?,
-        pub_date = ?;
+        pub_date = ?,
+        created_at = ?,
+        updated_at = ?;
     `
 
     const result = await this.connection.query(sql, [
       article.id,
       article.title,
       article.url,
-      article.pubDate
+      article.pubDate,
+      article.createdAt,
+      article.updatedAt
     ])
 
     return result

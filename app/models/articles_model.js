@@ -1,5 +1,5 @@
 const uuidv4 = require('uuid/v4')
-const moment = require('moment')
+const moment = require('moment-timezone')
 const ArticlesRepositry = require('../repositories/articles_repository')
 const ArticleEntity = require('../entities/article_entity')
 const { getArticles } = require('../lib/utils')
@@ -20,7 +20,9 @@ module.exports = class ArticlesModel {
           uuidv4(),
           article.title,
           article.link,
-          moment(article.pubDate).format('YYYY-MM-DD HH:mm:ss')
+          moment(article.pubDate).tz("Asia/Tokyo").format('YYYY-MM-DD HH:mm:ss'),
+          moment().tz("Asia/Tokyo").format('YYYY-MM-DD HH:mm:ss'),
+          moment().tz("Asia/Tokyo").format('YYYY-MM-DD HH:mm:ss')
         )
 
         await articlesRepositry.create(articleEntity)

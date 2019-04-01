@@ -4,7 +4,8 @@
     "user": "root",
     "password": "mysql",
     "database": "spiderdb",
-    "port": 3306
+    "port": 3306,
+    "charset": "utf8mb4_general_ci"
   },
   "feedUrls": [
     "https://inside.dmm.com/rss",
