@@ -1,5 +1,16 @@
 version: "3"
 services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    volumes:
+      - ./api/:/go/src/app
+    ports:
+      - 8080:8080
+
   app:
     build:
       context: ./app
