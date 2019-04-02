@@ -7,7 +7,7 @@ services:
     depends_on:
       - db
     volumes:
-      - ./api/:/go/src/app
+      - ./api/:/go/src/main
     ports:
       - 8080:8080
 
