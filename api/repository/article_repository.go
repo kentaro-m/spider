@@ -23,7 +23,7 @@ type articleRepository struct {
 }
 
 func (ar articleRepository) Get(ctx context.Context) ([]*entity.Article, error) {
-	query := "SELECT id, title, url, pub_date FROM articles"
+	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles"
 
 	rows, err := ar.Conn.QueryContext(ctx, query)
 
@@ -41,6 +41,8 @@ func (ar articleRepository) Get(ctx context.Context) ([]*entity.Article, error) 
 			&data.Title,
 			&data.URL,
 			&data.PubDate,
+			&data.CreatedAt,
+			&data.UpdatedAt,
 		)
 		if err != nil {
 			log.Fatal(err)
