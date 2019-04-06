@@ -3,21 +3,22 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"github.com/kentaro-m/spider/api/driver"
-	"github.com/kentaro-m/spider/api/repository"
-	"github.com/kentaro-m/spider/api/entity"
-	"github.com/satori/go.uuid"
-	"time"
+	"github.com/kentaro-m/spider/api/model"
 )
 
-func NewArticleHandler(db *driver.DB) *Article {
-	return &Article{
-		repo: repository.NewArticleRepository(db.SQL),
+func NewArticleHandler(m model.ArticleModel) ArticleHandler {
+	return &articleHandler{
+		model: m,
 	}
 }
 
-type Article struct {
-	repo repository.ArticleRepository
+type ArticleHandler interface {
+	Get(w http.ResponseWriter, r *http.Request)
+	Create(w http.ResponseWriter, r *http.Request)
+}
+
+type articleHandler struct {
+	model model.ArticleModel
 }
 
 // GetArticle godoc
@@ -27,8 +28,8 @@ type Article struct {
 // @Produce  json
 // @Success 200 {object} entity.Article
 // @Router /articles [get]
-func (a *Article) Get(w http.ResponseWriter, r *http.Request)  {
-	payload, _ := a.repo.Get(r.Context())
+func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request)  {
+	payload, _ := a.model.Get(r.Context())
 	respondwithJSON(w, http.StatusOK, payload)
 }
 
@@ -40,16 +41,8 @@ func (a *Article) Get(w http.ResponseWriter, r *http.Request)  {
 // @Param   article body entity.Article true  "article"
 // @Success 200
 // @Router /articles [post]
-func (a *Article) Create(w http.ResponseWriter, r *http.Request) {
-	timeStamp := time.Now().UTC().In(time.FixedZone("Asia/Tokyo", 9*60*60))
-
-	article := entity.Article{
-		ID: uuid.NewV4().String(),
-		CreatedAt: timeStamp,
-		UpdatedAt: timeStamp,
-	}
-	json.NewDecoder(r.Body).Decode(&article)
-	err := a.repo.Create(r.Context(), &article)
+func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
+	err := a.model.Create(r.Context(), r)
 
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Server Error")

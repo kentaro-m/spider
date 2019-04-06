@@ -1,8 +1,10 @@
 package main
 
 import (
-	ah "github.com/kentaro-m/spider/api/handler"
+	"github.com/kentaro-m/spider/api/handler"
 	"github.com/kentaro-m/spider/api/driver"
+	"github.com/kentaro-m/spider/api/model"
+	"github.com/kentaro-m/spider/api/repository"
 	"log"
 	"os"
 
@@ -38,12 +40,14 @@ func main() {
 		log.Fatal("Error: connecting DB")
 	}
 
-	handler := ah.NewArticleHandler(connection)
+	articleRepository := repository.NewArticleRepository(connection.SQL)
+	articleModel := model. NewArticleModel(articleRepository)
+	articleHandler := handler.NewArticleHandler(articleModel)
 
 	r := chi.NewRouter()
 
-	r.Get("/articles", handler.Get)
-	r.Post("/articles", handler.Create)
+	r.Get("/articles", articleHandler.Get)
+	r.Post("/articles", articleHandler.Create)
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	http.ListenAndServe(":8080", r)
