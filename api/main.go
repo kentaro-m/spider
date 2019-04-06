@@ -1,16 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"html"
-	"log"
+	"github.com/kentaro-m/spider/api/handler"
+
 	"net/http"
+	"github.com/go-chi/chi"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
-	})
+	r := chi.NewRouter()
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r.Get("/articles", handler.GetArticles)
+	r.Post("/articles", handler.CreateArticle)
+
+	http.ListenAndServe(":8080", r)
 }

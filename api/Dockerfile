@@ -6,9 +6,8 @@ COPY . .
 ENV GO111MODULE=on
 
 RUN go get -d -v ./...
-RUN go get -u github.com/oxequa/realize
 RUN go install -v ./...
 
 EXPOSE 8080
 
-CMD ["realize", "start", "--no-config", "--run"]
+CMD ["go", "run", "main.go"]
