@@ -62,7 +62,7 @@ func (ar *articleRepository) Create(ctx context.Context, a *entity.Article) erro
 		return err
 	}
 
-	_, err = stmt.ExecContext(ctx, a.ID, a.Title, a.URL, a.PubDate, a.CreatedAt, a.UpdatedAt)
+	_, err = stmt.ExecContext(ctx, a.ID, a.Title, a.URL, a.PubDate.Format("2006-01-02 15:04:05"), a.CreatedAt.Format("2006-01-02 15:04:05"), a.UpdatedAt.Format("2006-01-02 15:04:05"))
 	defer stmt.Close()
 
 	if err != nil {
