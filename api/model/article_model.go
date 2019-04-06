@@ -3,11 +3,11 @@ package model
 import (
 	"context"
 	"encoding/json"
+	"github.com/kentaro-m/spider/api/entity"
+	"github.com/kentaro-m/spider/api/repository"
+	"github.com/satori/go.uuid"
 	"net/http"
 	"time"
-	"github.com/kentaro-m/spider/api/repository"
-	"github.com/kentaro-m/spider/api/entity"
-	"github.com/satori/go.uuid"
 )
 
 type ArticleModel interface {
@@ -34,7 +34,7 @@ func (a articleModel) Create(ctx context.Context, r *http.Request) error {
 	timeStamp := time.Now().UTC().In(time.FixedZone("Asia/Tokyo", 9*60*60))
 
 	article := entity.Article{
-		ID: uuid.NewV4().String(),
+		ID:        uuid.NewV4().String(),
 		CreatedAt: timeStamp,
 		UpdatedAt: timeStamp,
 	}

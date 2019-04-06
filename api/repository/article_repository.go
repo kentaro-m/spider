@@ -15,7 +15,7 @@ func NewArticleRepository(Conn *sql.DB) ArticleRepository {
 
 type ArticleRepository interface {
 	Get(ctx context.Context) ([]*entity.Article, error)
-	Create(ctx context.Context, a *entity.Article) (error)
+	Create(ctx context.Context, a *entity.Article) error
 }
 
 type articleRepository struct {

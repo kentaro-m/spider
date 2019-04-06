@@ -1,18 +1,18 @@
 package main
 
 import (
-	"github.com/kentaro-m/spider/api/handler"
 	"github.com/kentaro-m/spider/api/driver"
+	"github.com/kentaro-m/spider/api/handler"
 	"github.com/kentaro-m/spider/api/model"
 	"github.com/kentaro-m/spider/api/repository"
 	"log"
 	"os"
 
-	"net/http"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
-	"github.com/swaggo/http-swagger"
 	_ "github.com/kentaro-m/spider/api/docs"
+	"github.com/swaggo/http-swagger"
+	"net/http"
 )
 
 // @title Spider API
@@ -41,7 +41,7 @@ func main() {
 	}
 
 	articleRepository := repository.NewArticleRepository(connection.SQL)
-	articleModel := model. NewArticleModel(articleRepository)
+	articleModel := model.NewArticleModel(articleRepository)
 	articleHandler := handler.NewArticleHandler(articleModel)
 
 	r := chi.NewRouter()

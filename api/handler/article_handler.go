@@ -2,8 +2,8 @@ package handler
 
 import (
 	"encoding/json"
-	"net/http"
 	"github.com/kentaro-m/spider/api/model"
+	"net/http"
 )
 
 func NewArticleHandler(m model.ArticleModel) ArticleHandler {
@@ -28,7 +28,7 @@ type articleHandler struct {
 // @Produce  json
 // @Success 200 {object} entity.Article
 // @Router /articles [get]
-func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request)  {
+func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 	payload, _ := a.model.Get(r.Context())
 	respondwithJSON(w, http.StatusOK, payload)
 }
