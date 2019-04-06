@@ -1,4 +1,4 @@
-package entities
+package entity
 
 type Article struct {
 	ID string `json:"id"`

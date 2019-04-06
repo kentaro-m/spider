@@ -4,13 +4,12 @@ import (
 	"net/http"
 	"github.com/go-chi/render"
 	"github.com/kentaro-m/spider/api/driver"
-	repository "github.com/kentaro-m/spider/api/repository"
-	article "github.com/kentaro-m/spider/api/repository/article"
+	"github.com/kentaro-m/spider/api/repository"
 )
 
 func NewArticleHandler(db *driver.DB) *Article {
 	return &Article{
-		repo: article.NewMySQLArticleRepository(db.SQL),
+		repo: repository.NewArticleRepository(db.SQL),
 	}
 }
 

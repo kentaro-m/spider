@@ -1,27 +1,31 @@
-package article
+package repository
 
 import (
 	"context"
 	"database/sql"
-	"github.com/kentaro-m/spider/api/entities"
-	aRepo "github.com/kentaro-m/spider/api/repository"
+	"github.com/kentaro-m/spider/api/entity"
 	"log"
 )
 
-func NewMySQLArticleRepository(Conn *sql.DB) aRepo.ArticleRepository {
-	return &mysqlArticleRepository{
+func NewArticleRepository(Conn *sql.DB) ArticleRepository {
+	return &articleRepository{
 		Conn: Conn,
 	}
 }
 
-type mysqlArticleRepository struct {
+type ArticleRepository interface {
+	Get(ctx context.Context) ([]*entity.Article, error)
+	Create(ctx context.Context, a *entity.Article) (error)
+}
+
+type articleRepository struct {
 	Conn *sql.DB
 }
 
-func (m *mysqlArticleRepository) Get(ctx context.Context) ([]*entities.Article, error) {
+func (ar articleRepository) Get(ctx context.Context) ([]*entity.Article, error) {
 	query := "SELECT id, title, url, pub_date FROM articles"
 
-	rows, err := m.Conn.QueryContext(ctx, query)
+	rows, err := ar.Conn.QueryContext(ctx, query)
 
 	if err != nil {
 		log.Fatal(err)
@@ -29,9 +33,9 @@ func (m *mysqlArticleRepository) Get(ctx context.Context) ([]*entities.Article, 
 	}
 	defer rows.Close()
 
-	payload := make([]*entities.Article, 0)
+	payload := make([]*entity.Article, 0)
 	for rows.Next() {
-		data := new(entities.Article)
+		data := new(entity.Article)
 		err := rows.Scan(
 			&data.ID,
 			&data.Title,
@@ -48,10 +52,10 @@ func (m *mysqlArticleRepository) Get(ctx context.Context) ([]*entities.Article, 
 	return payload, nil
 }
 
-func (m *mysqlArticleRepository) Create(ctx context.Context, a *entities.Article) error {
+func (ar *articleRepository) Create(ctx context.Context, a *entity.Article) error {
 	query := "INSERT INTO articles SET id = ?, title = ?, url = ?, pub_date = ?, created_at = ?, updated_at = ?"
 
-	stmt, err := m.Conn.PrepareContext(ctx, query)
+	stmt, err := ar.Conn.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
