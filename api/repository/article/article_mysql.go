@@ -3,7 +3,7 @@ package article
 import (
 	"context"
 	"database/sql"
-	"github.com/kentaro-m/spider/api/entity"
+	"github.com/kentaro-m/spider/api/entities"
 	aRepo "github.com/kentaro-m/spider/api/repository"
 	"log"
 )
@@ -18,7 +18,7 @@ type mysqlArticleRepository struct {
 	Conn *sql.DB
 }
 
-func (m *mysqlArticleRepository) Get(ctx context.Context) ([]*entity.ArticleEntity, error) {
+func (m *mysqlArticleRepository) Get(ctx context.Context) ([]*entities.Article, error) {
 	query := "SELECT id, title, url, pub_date FROM articles"
 
 	rows, err := m.Conn.QueryContext(ctx, query)
@@ -29,9 +29,9 @@ func (m *mysqlArticleRepository) Get(ctx context.Context) ([]*entity.ArticleEnti
 	}
 	defer rows.Close()
 
-	payload := make([]*entity.ArticleEntity, 0)
+	payload := make([]*entities.Article, 0)
 	for rows.Next() {
-		data := new(entity.ArticleEntity)
+		data := new(entities.Article)
 		err := rows.Scan(
 			&data.ID,
 			&data.Title,
@@ -48,7 +48,7 @@ func (m *mysqlArticleRepository) Get(ctx context.Context) ([]*entity.ArticleEnti
 	return payload, nil
 }
 
-func (m *mysqlArticleRepository) Create(ctx context.Context, a *entity.ArticleEntity) error {
+func (m *mysqlArticleRepository) Create(ctx context.Context, a *entities.Article) error {
 	query := "INSERT INTO articles SET id = ?, title = ?, url = ?, pub_date = ?, created_at = ?, updated_at = ?"
 
 	stmt, err := m.Conn.PrepareContext(ctx, query)
