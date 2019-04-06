@@ -20,11 +20,26 @@ type Article struct {
 	repo repository.ArticleRepository
 }
 
+// GetArticle godoc
+// @Summary Get articles
+// @Tags articles
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} entity.Article
+// @Router /articles [get]
 func (a *Article) Get(w http.ResponseWriter, r *http.Request)  {
 	payload, _ := a.repo.Get(r.Context())
 	respondwithJSON(w, http.StatusOK, payload)
 }
 
+// CreateArticle godoc
+// @Summary Add a new article
+// @Tags articles
+// @Accept  json
+// @Produce  json
+// @Param   article body entity.Article true  "article"
+// @Success 200
+// @Router /articles [post]
 func (a *Article) Create(w http.ResponseWriter, r *http.Request) {
 	timeStamp := time.Now().UTC().In(time.FixedZone("Asia/Tokyo", 9*60*60))
 

@@ -1,0 +1,67 @@
+basePath: /
+definitions:
+  entity.Article:
+    properties:
+      created_at:
+        example: "2019-04-06T16:03:31Z"
+        type: string
+      id:
+        example: faf9c3a7-b3ee-441f-baec-a5b668948381
+        type: string
+      pub_date:
+        example: "2019-01-19T14:13:01Z"
+        type: string
+      title:
+        example: AWS CDKでサーバーレスアプリケーションのデプロイを試す
+        type: string
+      updated_at:
+        example: "2019-04-06T16:03:31Z"
+        type: string
+      url:
+        example: https://blog.kentarom.com/learn-aws-cdk/
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a Spider API server.
+  license:
+    name: MIT
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Spider API
+  version: "1.0"
+paths:
+  /articles:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Article'
+            type: object
+      summary: Get articles
+      tags:
+      - articles
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: article
+        in: body
+        name: article
+        required: true
+        schema:
+          $ref: '#/definitions/entity.Article'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200": {}
+      summary: Add a new article
+      tags:
+      - articles
+swagger: "2.0"

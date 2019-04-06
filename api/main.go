@@ -9,8 +9,16 @@ import (
 	"net/http"
 	"github.com/go-chi/chi"
 	"github.com/joho/godotenv"
+	"github.com/swaggo/http-swagger"
+	_ "github.com/kentaro-m/spider/api/docs"
 )
 
+// @title Spider API
+// @version 1.0
+// @description This is a Spider API server.
+// @license.name MIT
+// @host localhost:8080
+// @BasePath /
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -36,6 +44,7 @@ func main() {
 
 	r.Get("/articles", handler.Get)
 	r.Post("/articles", handler.Create)
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	http.ListenAndServe(":8080", r)
 }

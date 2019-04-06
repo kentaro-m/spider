@@ -1,0 +1,98 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a Spider API server.",
+        "title": "Spider API",
+        "contact": {},
+        "license": {
+            "name": "MIT",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/articles": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Get articles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/entity.Article"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Add a new article",
+                "parameters": [
+                    {
+                        "description": "article",
+                        "name": "article",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "$ref": "#/definitions/entity.Article"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {}
+                }
+            }
+        }
+    },
+    "definitions": {
+        "entity.Article": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "2019-04-06T16:03:31Z"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "faf9c3a7-b3ee-441f-baec-a5b668948381"
+                },
+                "pub_date": {
+                    "type": "string",
+                    "example": "2019-01-19T14:13:01Z"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "AWS CDKでサーバーレスアプリケーションのデプロイを試す"
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "2019-04-06T16:03:31Z"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://blog.kentarom.com/learn-aws-cdk/"
+                }
+            }
+        }
+    }
+}
