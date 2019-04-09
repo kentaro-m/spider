@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/kentaro-m/spider/api/entity"
+	"golang.org/x/xerrors"
 )
 
 func NewArticleRepository(Conn *sql.DB) ArticleRepository {
@@ -27,14 +28,14 @@ func (ar articleRepository) Get(ctx context.Context) ([]*entity.Article, error) 
 	rows, err := ar.Conn.QueryContext(ctx, query)
 
 	if err != nil {
-		return nil, err
+		return nil, xerrors.Errorf("failed to execute a query: %w", err)
 	}
 
 	defer func() {
 		er := rows.Close()
 
 		if er != nil {
-			err = er
+			err = xerrors.Errorf("failed to close a connection: %w", er)
 		}
 	}()
 
@@ -51,7 +52,7 @@ func (ar articleRepository) Get(ctx context.Context) ([]*entity.Article, error) 
 		)
 
 		if err != nil {
-			return nil, err
+			return nil, xerrors.Errorf("failed to convert columns into Go types: %w", err)
 		}
 
 		payload = append(payload, data)
@@ -66,20 +67,20 @@ func (ar *articleRepository) Create(ctx context.Context, a *entity.Article) erro
 	stmt, err := ar.Conn.PrepareContext(ctx, query)
 
 	if err != nil {
-		return err
+		return xerrors.Errorf("failed to create a prepared statement: %w", err)
 	}
 
 	_, err = stmt.ExecContext(ctx, a.ID, a.Title, a.URL, a.PubDate.Format("2006-01-02 15:04:05"), a.CreatedAt.Format("2006-01-02 15:04:05"), a.UpdatedAt.Format("2006-01-02 15:04:05"))
 
 	if err != nil {
-		return err
+		return xerrors.Errorf("failed to execute a prepared statement: %w", err)
 	}
 
 	defer func() {
 		er := stmt.Close()
 
 		if er != nil {
-			err = er
+			err = xerrors.Errorf("failed to close a connection: %w", er)
 		}
 	}()
 

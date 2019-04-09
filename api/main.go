@@ -5,6 +5,7 @@ import (
 	"github.com/kentaro-m/spider/api/handler"
 	"github.com/kentaro-m/spider/api/model"
 	"github.com/kentaro-m/spider/api/repository"
+	"golang.org/x/xerrors"
 	"log"
 	"os"
 
@@ -25,7 +26,8 @@ func main() {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatal("Error: loading .env file")
+		log.Printf("Error: %+v\n", xerrors.Errorf("failed to load .env file: %w", err))
+		os.Exit(1)
 	}
 
 	dbHost := os.Getenv("DB_HOST")
@@ -38,7 +40,8 @@ func main() {
 	connection, err := driver.ConnectDB(dbHost, dbPort, dbUser, dbPassword, dbName, dbCharset)
 
 	if err != nil {
-		log.Fatal("Error: connecting DB")
+		log.Printf("Error: %+v\n", xerrors.Errorf("failed to connect to DB: %w", err))
+		os.Exit(1)
 	}
 
 	articleRepository := repository.NewArticleRepository(connection.SQL)
@@ -54,6 +57,7 @@ func main() {
 	err = http.ListenAndServe(":8080", r)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error: %+v\n", err)
+		os.Exit(1)
 	}
 }

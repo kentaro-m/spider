@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/kentaro-m/spider/api/model"
 	"log"
 	"net/http"
@@ -34,8 +33,7 @@ func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 	payload, err := a.model.Get(r.Context())
 
 	if err != nil {
-		fmt.Printf("Error: %+v\n", err)
-		log.Print(err)
+		log.Printf("Error: %+v\n", err)
 		respondWithError(w, http.StatusInternalServerError, "Server Error")
 		return
 	}
@@ -55,8 +53,7 @@ func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	err := a.model.Create(r.Context(), r)
 
 	if err != nil {
-		fmt.Printf("Error: %+v\n", err)
-		log.Print(err)
+		log.Printf("Error: %+v\n", err)
 		respondWithError(w, http.StatusInternalServerError, "Server Error")
 		return
 	}
