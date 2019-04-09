@@ -23,6 +23,7 @@ import (
 // @BasePath /
 func main() {
 	err := godotenv.Load()
+
 	if err != nil {
 		log.Fatal("Error: loading .env file")
 	}
@@ -50,5 +51,9 @@ func main() {
 	r.Post("/articles", articleHandler.Create)
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
-	http.ListenAndServe(":8080", r)
+	err = http.ListenAndServe(":8080", r)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }

@@ -2,7 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/kentaro-m/spider/api/model"
+	"log"
 	"net/http"
 )
 
@@ -29,8 +31,16 @@ type articleHandler struct {
 // @Success 200 {object} entity.Article
 // @Router /articles [get]
 func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
-	payload, _ := a.model.Get(r.Context())
-	respondwithJSON(w, http.StatusOK, payload)
+	payload, err := a.model.Get(r.Context())
+
+	if err != nil {
+		fmt.Printf("Error: %+v\n", err)
+		log.Print(err)
+		respondWithError(w, http.StatusInternalServerError, "Server Error")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, payload)
 }
 
 // CreateArticle godoc
@@ -45,13 +55,16 @@ func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	err := a.model.Create(r.Context(), r)
 
 	if err != nil {
+		fmt.Printf("Error: %+v\n", err)
+		log.Print(err)
 		respondWithError(w, http.StatusInternalServerError, "Server Error")
+		return
 	}
 
-	respondwithJSON(w, http.StatusCreated, map[string]string{"message": "Successfully Created"})
+	respondWithJSON(w, http.StatusCreated, map[string]string{"message": "Successfully Created"})
 }
 
-func respondwithJSON(w http.ResponseWriter, code int, payload interface{}) {
+func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, _ := json.Marshal(payload)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -60,5 +73,5 @@ func respondwithJSON(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 func respondWithError(w http.ResponseWriter, code int, msg string) {
-	respondwithJSON(w, code, map[string]string{"message": msg})
+	respondWithJSON(w, code, map[string]string{"message": msg})
 }

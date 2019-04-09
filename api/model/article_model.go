@@ -38,8 +38,14 @@ func (a articleModel) Create(ctx context.Context, r *http.Request) error {
 		CreatedAt: timeStamp,
 		UpdatedAt: timeStamp,
 	}
-	json.NewDecoder(r.Body).Decode(&article)
-	err := a.repo.Create(r.Context(), &article)
+
+	err := json.NewDecoder(r.Body).Decode(&article)
+
+	if err != nil {
+		return err
+	}
+
+	err = a.repo.Create(r.Context(), &article)
 
 	return err
 }
