@@ -7,8 +7,6 @@ import (
 	"golang.org/x/xerrors"
 	"log"
 	"net/http"
-	"gopkg.in/go-playground/validator.v9"
-	"github.com/mholt/binding"
 )
 
 func NewArticleHandler(m model.ArticleModel) ArticleHandler {
@@ -26,16 +24,6 @@ type articleHandler struct {
 	model model.ArticleModel
 }
 
-const (
-	ErrSinceValidationFailed = "since should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
-	ErrUntilValidationFailed = "until should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
-	ErrLimitValidationFailed = "limit should be a number (min 1 and max 50)"
-	ErrSortValidationFailed = "sort can be a one of asc or desc"
-	ErrTitleValidationFailed = "title should be a string"
-	ErrURLValidationFailed = "url should be a url format (http://)"
-	ErrPubDateValidationFailed = "pub_date should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
-)
-
 // GetArticle godoc
 // @Summary Get articles
 // @Tags articles
@@ -45,50 +33,10 @@ const (
 // @Router /articles [get]
 func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 	getArticleForm := new(form.GetArticleForm)
-	errs := binding.URL(r, getArticleForm)
-
-	if errs != nil {
-		var msg string
-
-		for _, e := range errs.(binding.Errors) {
-			for _, fieldName := range e.Fields() {
-				switch fieldName {
-				case "since":
-					msg = ErrSinceValidationFailed
-				case "until":
-					msg = ErrUntilValidationFailed
-				case "limit":
-					msg = ErrLimitValidationFailed
-				case "sort":
-					msg = ErrSortValidationFailed
-				}
-			}
-			log.Printf("Error: %+v\n", xerrors.Errorf("failed to bind request params: %w", e))
-			respondWithError(w, http.StatusBadRequest, msg)
-			return
-		}
-	}
-
-	validate := validator.New()
-	err := validate.Struct(getArticleForm)
+	msg, err := getArticleForm.Validate(r)
 
 	if err != nil {
-		var msg string
-		for _, e := range err.(validator.ValidationErrors) {
-			fieldName := e.Field()
-			switch fieldName {
-			case "Since":
-				msg = ErrSinceValidationFailed
-			case "Until":
-				msg = ErrUntilValidationFailed
-			case "Limit":
-				msg = ErrLimitValidationFailed
-			case "Sort":
-				msg = ErrSortValidationFailed
-			}
-		}
-
-		log.Printf("Error: %+v\n", xerrors.Errorf("failed to validate request params: %w", err))
+		log.Printf("Error: %+v\n", xerrors.Errorf("failed to validate form value: %w", err))
 		respondWithError(w, http.StatusBadRequest, msg)
 		return
 	}
@@ -114,45 +62,10 @@ func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Router /articles [post]
 func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	createArticleForm := new(form.CreateArticleForm)
-	errs := binding.Json(r, createArticleForm)
-
-	if errs != nil {
-		var msg string
-		for _, e := range errs.(binding.Errors) {
-			for _, fieldName := range e.Fields() {
-				switch fieldName {
-				case "title":
-					msg = ErrTitleValidationFailed
-				case "url":
-					msg = ErrURLValidationFailed
-				case "pub_date":
-					msg = ErrPubDateValidationFailed
-				}
-			}
-			log.Printf("Error: %+v\n", xerrors.Errorf("failed to bind request params: %w", e))
-			respondWithError(w, http.StatusBadRequest, msg)
-			return
-		}
-	}
-
-	validate := validator.New()
-	err := validate.Struct(createArticleForm)
+	msg, err := createArticleForm.Validate(r)
 
 	if err != nil {
-		var msg string
-		for _, e := range err.(validator.ValidationErrors) {
-			fieldName := e.Field()
-			switch fieldName {
-			case "Title":
-				msg = ErrTitleValidationFailed
-			case "URL":
-				msg = ErrURLValidationFailed
-			case "PubDate":
-				msg = ErrPubDateValidationFailed
-			}
-		}
-
-		log.Printf("Error: %+v\n", xerrors.Errorf("failed to validate request params: %w", err))
+		log.Printf("Error: %+v\n", xerrors.Errorf("failed to validate form value: %w", err))
 		respondWithError(w, http.StatusBadRequest, msg)
 		return
 	}
