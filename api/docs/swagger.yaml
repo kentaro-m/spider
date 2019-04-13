@@ -27,7 +27,6 @@ info:
   description: This is a Spider API server.
   license:
     name: MIT
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Spider API
   version: "1.0"
 paths:

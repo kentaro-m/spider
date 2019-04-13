@@ -5,8 +5,7 @@
         "title": "Spider API",
         "contact": {},
         "license": {
-            "name": "MIT",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+            "name": "MIT"
         },
         "version": "1.0"
     },

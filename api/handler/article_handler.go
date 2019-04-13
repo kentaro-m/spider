@@ -29,32 +29,63 @@ type articleHandler struct {
 type GetArticleForm struct {
 	Since time.Time
 	Until time.Time
-	Limit int `validate:"min=1,max=50"`
-	Sort string `validate:"oneof=desc asc"`
+	Limit int `validate:"omitempty,min=1,max=50"`
+	Sort string `validate:"omitempty,oneof=desc asc"`
 }
 
 func (g *GetArticleForm) FieldMap(r *http.Request) binding.FieldMap {
 	return binding.FieldMap{
-		&g.Since: "since",
-		&g.Until: "until",
-		&g.Limit: "limit",
-		&g.Sort: "sort",
+		&g.Since: binding.Field{
+			Form: "since",
+			Required: false,
+		},
+		&g.Until: binding.Field{
+			Form: "until",
+			Required: false,
+		},
+		&g.Limit: binding.Field{
+			Form: "limit",
+			Required: false,
+		},
+		&g.Sort: binding.Field{
+			Form: "sort",
+			Required: false,
+		},
 	}
 }
 
 type CreateArticleForm struct {
-	Title     string    `json:"title" example:"AWS CDKでサーバーレスアプリケーションのデプロイを試す"`
-	URL       string    `json:"url" example:"https://blog.kentarom.com/learn-aws-cdk/"`
-	PubDate   time.Time `json:"pub_date" example:"2019-01-19T14:13:01Z"`
+	Title     string    `json:"title" validate:"required" example:"AWS CDKでサーバーレスアプリケーションのデプロイを試す"`
+	URL       string    `json:"url" validate:"required,url" example:"https://blog.kentarom.com/learn-aws-cdk/"`
+	PubDate   time.Time `json:"pub_date" validate:"required" example:"2019-01-19T14:13:01Z"`
 }
 
 func (c *CreateArticleForm) FieldMap(r *http.Request) binding.FieldMap {
 	return binding.FieldMap{
-		&c.Title: "title",
-		&c.URL: "url",
-		&c.PubDate: "pub_date",
+		&c.Title: binding.Field{
+			Form: "title",
+			Required: true,
+		},
+		&c.URL: binding.Field{
+			Form: "url",
+			Required: true,
+		},
+		&c.PubDate: binding.Field{
+			Form: "pub_date",
+			Required: true,
+		},
 	}
 }
+
+const (
+	ErrSinceValidationFailed = "since should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
+	ErrUntilValidationFailed = "until should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
+	ErrLimitValidationFailed = "limit should be a number (min 1 and max 50)"
+	ErrSortValidationFailed = "sort can be a one of asc or desc"
+	ErrTitleValidationFailed = "title should be a string"
+	ErrURLValidationFailed = "url should be a url format (http://)"
+	ErrPubDateValidationFailed = "pub_date should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
+)
 
 // GetArticle godoc
 // @Summary Get articles
@@ -65,16 +96,32 @@ func (c *CreateArticleForm) FieldMap(r *http.Request) binding.FieldMap {
 // @Router /articles [get]
 func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 	getArticleForm := new(GetArticleForm)
-	err := binding.URL(r, getArticleForm)
+	errs := binding.URL(r, getArticleForm)
 
-	if err != nil {
-		log.Printf("Error: %+v\n", xerrors.Errorf("failed to bind request params: %w", err))
-		respondWithError(w, http.StatusBadRequest, "Server Error")
-		return
+	if errs != nil {
+		var msg string
+
+		for _, e := range errs.(binding.Errors) {
+			for _, fieldName := range e.Fields() {
+				switch fieldName {
+				case "since":
+					msg = ErrSinceValidationFailed
+				case "until":
+					msg = ErrUntilValidationFailed
+				case "limit":
+					msg = ErrLimitValidationFailed
+				case "sort":
+					msg = ErrSortValidationFailed
+				}
+			}
+			log.Printf("Error: %+v\n", xerrors.Errorf("failed to bind request params: %w", e))
+			respondWithError(w, http.StatusBadRequest, msg)
+			return
+		}
 	}
 
 	validate := validator.New()
-	err = validate.Struct(getArticleForm)
+	err := validate.Struct(getArticleForm)
 
 	if err != nil {
 		var msg string
@@ -82,13 +129,13 @@ func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 			fieldName := e.Field()
 			switch fieldName {
 			case "Since":
-				msg = "since should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
+				msg = ErrSinceValidationFailed
 			case "Until":
-				msg = "until should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
+				msg = ErrUntilValidationFailed
 			case "Limit":
-				msg = "limit should be a number (min 1 and max 50)"
+				msg = ErrLimitValidationFailed
 			case "Sort":
-				msg = "sort can be a one of asc or desc"
+				msg = ErrSortValidationFailed
 			}
 		}
 
@@ -118,16 +165,29 @@ func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Router /articles [post]
 func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
 	createArticleForm := new(CreateArticleForm)
-	err := binding.Form(r, createArticleForm)
+	errs := binding.Json(r, createArticleForm)
 
-	if err != nil {
-		log.Printf("Error: %+v\n", xerrors.Errorf("failed to bind request params: %w", err))
-		respondWithError(w, http.StatusBadRequest, "Server Error")
-		return
+	if errs != nil {
+		var msg string
+		for _, e := range errs.(binding.Errors) {
+			for _, fieldName := range e.Fields() {
+				switch fieldName {
+				case "title":
+					msg = ErrTitleValidationFailed
+				case "url":
+					msg = ErrURLValidationFailed
+				case "pub_date":
+					msg = ErrPubDateValidationFailed
+				}
+			}
+			log.Printf("Error: %+v\n", xerrors.Errorf("failed to bind request params: %w", e))
+			respondWithError(w, http.StatusBadRequest, msg)
+			return
+		}
 	}
 
 	validate := validator.New()
-	err = validate.Struct(createArticleForm)
+	err := validate.Struct(createArticleForm)
 
 	if err != nil {
 		var msg string
@@ -135,11 +195,11 @@ func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
 			fieldName := e.Field()
 			switch fieldName {
 			case "Title":
-				msg = "title should be a string"
+				msg = ErrTitleValidationFailed
 			case "URL":
-				msg = "url should be a string"
+				msg = ErrURLValidationFailed
 			case "PubDate":
-				msg = "pub_date should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ"
+				msg = ErrPubDateValidationFailed
 			}
 		}
 
