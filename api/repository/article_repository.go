@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/kentaro-m/spider/api/entity"
+	"github.com/kentaro-m/spider/api/form"
 	"golang.org/x/xerrors"
 )
 
@@ -14,7 +15,7 @@ func NewArticleRepository(Conn *sql.DB) ArticleRepository {
 }
 
 type ArticleRepository interface {
-	Get(ctx context.Context) ([]*entity.Article, error)
+	Get(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
 	Create(ctx context.Context, a *entity.Article) error
 }
 
@@ -22,10 +23,14 @@ type articleRepository struct {
 	Conn *sql.DB
 }
 
-func (ar articleRepository) Get(ctx context.Context) ([]*entity.Article, error) {
-	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles"
+func (ar articleRepository) Get(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date DESC LIMIT ?"
 
-	rows, err := ar.Conn.QueryContext(ctx, query)
+	if g.Sort == "asc" {
+		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date ASC LIMIT ?"
+	}
+
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Since.Format("2006-01-02 15:04:05"), g.Limit)
 
 	if err != nil {
 		return nil, xerrors.Errorf("failed to execute a query: %w", err)

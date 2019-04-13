@@ -3,12 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"github.com/kentaro-m/spider/api/model"
+	"github.com/kentaro-m/spider/api/form"
 	"golang.org/x/xerrors"
 	"log"
 	"net/http"
 	"gopkg.in/go-playground/validator.v9"
 	"github.com/mholt/binding"
-	"time"
 )
 
 func NewArticleHandler(m model.ArticleModel) ArticleHandler {
@@ -24,57 +24,6 @@ type ArticleHandler interface {
 
 type articleHandler struct {
 	model model.ArticleModel
-}
-
-type GetArticleForm struct {
-	Since time.Time
-	Until time.Time
-	Limit int `validate:"omitempty,min=1,max=50"`
-	Sort string `validate:"omitempty,oneof=desc asc"`
-}
-
-func (g *GetArticleForm) FieldMap(r *http.Request) binding.FieldMap {
-	return binding.FieldMap{
-		&g.Since: binding.Field{
-			Form: "since",
-			Required: false,
-		},
-		&g.Until: binding.Field{
-			Form: "until",
-			Required: false,
-		},
-		&g.Limit: binding.Field{
-			Form: "limit",
-			Required: false,
-		},
-		&g.Sort: binding.Field{
-			Form: "sort",
-			Required: false,
-		},
-	}
-}
-
-type CreateArticleForm struct {
-	Title     string    `json:"title" validate:"required" example:"AWS CDKでサーバーレスアプリケーションのデプロイを試す"`
-	URL       string    `json:"url" validate:"required,url" example:"https://blog.kentarom.com/learn-aws-cdk/"`
-	PubDate   time.Time `json:"pub_date" validate:"required" example:"2019-01-19T14:13:01Z"`
-}
-
-func (c *CreateArticleForm) FieldMap(r *http.Request) binding.FieldMap {
-	return binding.FieldMap{
-		&c.Title: binding.Field{
-			Form: "title",
-			Required: true,
-		},
-		&c.URL: binding.Field{
-			Form: "url",
-			Required: true,
-		},
-		&c.PubDate: binding.Field{
-			Form: "pub_date",
-			Required: true,
-		},
-	}
 }
 
 const (
@@ -95,7 +44,7 @@ const (
 // @Success 200 {object} entity.Article
 // @Router /articles [get]
 func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
-	getArticleForm := new(GetArticleForm)
+	getArticleForm := new(form.GetArticleForm)
 	errs := binding.URL(r, getArticleForm)
 
 	if errs != nil {
@@ -144,7 +93,7 @@ func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload, err := a.model.Get(r.Context())
+	payload, err := a.model.Get(r.Context(), getArticleForm)
 
 	if err != nil {
 		log.Printf("Error: %+v\n", err)
@@ -164,7 +113,7 @@ func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Success 200
 // @Router /articles [post]
 func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
-	createArticleForm := new(CreateArticleForm)
+	createArticleForm := new(form.CreateArticleForm)
 	errs := binding.Json(r, createArticleForm)
 
 	if errs != nil {
@@ -208,7 +157,7 @@ func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = a.model.Create(r.Context(), r)
+	err = a.model.Create(r.Context(), r, createArticleForm)
 
 	if err != nil {
 		log.Printf("Error: %+v\n", err)
