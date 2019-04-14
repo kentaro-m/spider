@@ -35,15 +35,37 @@ func (a articleModel) Get(ctx context.Context, g *form.GetArticleForm) ([]*entit
 		g.Sort = "desc"
 	}
 
-	if g.Until.IsZero() {
-		g.Until = time.Now().UTC().In(time.FixedZone("Asia/Tokyo", 9*60*60))
+	if !g.Until.IsZero() && !g.Since.IsZero() {
+		payload, err := a.repo.GetArticlesBySinceAndUntil(ctx, g)
+
+		if err != nil {
+			return nil, xerrors.Errorf("failed to get articles from DB: %w", err)
+		}
+
+		return payload, err
 	}
 
-	if g.Since.IsZero() {
-		g.Since = time.Now().Add(- time.Hour * 24 * 7).UTC().In(time.FixedZone("Asia/Tokyo", 9*60*60))
+	if g.Until.IsZero() && !g.Since.IsZero() {
+		payload, err := a.repo.GetArticlesBySince(ctx, g)
+
+		if err != nil {
+			return nil, xerrors.Errorf("failed to get articles from DB: %w", err)
+		}
+
+		return payload, err
 	}
 
-	payload, err := a.repo.Get(ctx, g)
+	if !g.Until.IsZero() && g.Since.IsZero() {
+		payload, err := a.repo.GetArticlesByUntil(ctx, g)
+
+		if err != nil {
+			return nil, xerrors.Errorf("failed to get articles from DB: %w", err)
+		}
+
+		return payload, err
+	}
+
+	payload, err := a.repo.GetNewArticles(ctx, g)
 
 	if err != nil {
 		return nil, xerrors.Errorf("failed to get articles from DB: %w", err)

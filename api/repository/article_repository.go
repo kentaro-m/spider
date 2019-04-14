@@ -15,7 +15,10 @@ func NewArticleRepository(Conn *sql.DB) ArticleRepository {
 }
 
 type ArticleRepository interface {
-	Get(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
+	GetNewArticles(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
+	GetArticlesBySince(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
+	GetArticlesByUntil(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
+	GetArticlesBySinceAndUntil(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
 	Create(ctx context.Context, a *entity.Article) error
 }
 
@@ -23,7 +26,136 @@ type articleRepository struct {
 	Conn *sql.DB
 }
 
-func (ar articleRepository) Get(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+func (ar articleRepository) GetNewArticles(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date DESC LIMIT ?"
+
+	if g.Sort == "asc" {
+		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date ASC LIMIT ?"
+	}
+
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Limit)
+
+	if err != nil {
+		return nil, xerrors.Errorf("failed to execute a query: %w", err)
+	}
+
+	defer func() {
+		er := rows.Close()
+
+		if er != nil {
+			err = xerrors.Errorf("failed to close a connection: %w", er)
+		}
+	}()
+
+	payload := make([]*entity.Article, 0)
+	for rows.Next() {
+		data := new(entity.Article)
+		err := rows.Scan(
+			&data.ID,
+			&data.Title,
+			&data.URL,
+			&data.PubDate,
+			&data.CreatedAt,
+			&data.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, xerrors.Errorf("failed to convert columns into Go types: %w", err)
+		}
+
+		payload = append(payload, data)
+	}
+
+	return payload, err
+}
+
+func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date DESC LIMIT ?"
+
+	if g.Sort == "asc" {
+		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date ASC LIMIT ?"
+	}
+
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Since.Format("2006-01-02 15:04:05"), g.Limit)
+
+	if err != nil {
+		return nil, xerrors.Errorf("failed to execute a query: %w", err)
+	}
+
+	defer func() {
+		er := rows.Close()
+
+		if er != nil {
+			err = xerrors.Errorf("failed to close a connection: %w", er)
+		}
+	}()
+
+	payload := make([]*entity.Article, 0)
+	for rows.Next() {
+		data := new(entity.Article)
+		err := rows.Scan(
+			&data.ID,
+			&data.Title,
+			&data.URL,
+			&data.PubDate,
+			&data.CreatedAt,
+			&data.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, xerrors.Errorf("failed to convert columns into Go types: %w", err)
+		}
+
+		payload = append(payload, data)
+	}
+
+	return payload, err
+}
+
+func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
+
+	if g.Sort == "asc" {
+		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date ASC LIMIT ?"
+	}
+
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Until.Format("2006-01-02 15:04:05"), g.Limit)
+
+	if err != nil {
+		return nil, xerrors.Errorf("failed to execute a query: %w", err)
+	}
+
+	defer func() {
+		er := rows.Close()
+
+		if er != nil {
+			err = xerrors.Errorf("failed to close a connection: %w", er)
+		}
+	}()
+
+	payload := make([]*entity.Article, 0)
+	for rows.Next() {
+		data := new(entity.Article)
+		err := rows.Scan(
+			&data.ID,
+			&data.Title,
+			&data.URL,
+			&data.PubDate,
+			&data.CreatedAt,
+			&data.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, xerrors.Errorf("failed to convert columns into Go types: %w", err)
+		}
+
+		payload = append(payload, data)
+	}
+
+	return payload, err
+}
+
+func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
 	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
 
 	if g.Sort == "asc" {
