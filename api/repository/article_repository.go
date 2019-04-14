@@ -24,13 +24,13 @@ type articleRepository struct {
 }
 
 func (ar articleRepository) Get(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
-	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date DESC LIMIT ?"
+	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
 
 	if g.Sort == "asc" {
-		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date ASC LIMIT ?"
+		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date ASC LIMIT ?"
 	}
 
-	rows, err := ar.Conn.QueryContext(ctx, query, g.Since.Format("2006-01-02 15:04:05"), g.Limit)
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Since.Format("2006-01-02 15:04:05"), g.Until.Format("2006-01-02 15:04:05"), g.Limit)
 
 	if err != nil {
 		return nil, xerrors.Errorf("failed to execute a query: %w", err)

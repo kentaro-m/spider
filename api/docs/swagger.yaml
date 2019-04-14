@@ -56,8 +56,7 @@ paths:
         in: query
         name: since
         type: string
-      - default: "2019-01-19T14:13:01Z"
-        description: Unused parameter (deprecated)
+      - description: Only articles published at or before this time are returned.
         in: query
         name: until
         type: string

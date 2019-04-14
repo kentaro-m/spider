@@ -30,7 +30,7 @@ type articleHandler struct {
 // @Accept  json
 // @Produce  json
 // @Param since query string false "Only articles published at or after this time are returned." default(2019-01-19T14:13:01Z)
-// @Param until query string false "Unused parameter (deprecated)" default(2019-01-19T14:13:01Z)
+// @Param until query string false "Only articles published at or before this time are returned."
 // @Param sort query string false "The direction of the sort by pub_date" default(desc) Enums(desc, asc)
 // @Param limit query int false "The number of articles that you can get the result" default(50) mininum(1) maxinum(50)
 // @Success 200 {object} entity.Article
