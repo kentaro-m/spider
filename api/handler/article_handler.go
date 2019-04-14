@@ -3,6 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"github.com/kentaro-m/spider/api/model"
+	"github.com/kentaro-m/spider/api/form"
+	"golang.org/x/xerrors"
 	"log"
 	"net/http"
 )
@@ -27,10 +29,23 @@ type articleHandler struct {
 // @Tags articles
 // @Accept  json
 // @Produce  json
+// @Param since query string false "Only articles published at or after this time are returned." default(2019-01-19T14:13:01Z)
+// @Param until query string false "Only articles published at or before this time are returned."
+// @Param sort query string false "The direction of the sort by pub_date" default(desc) Enums(desc, asc)
+// @Param limit query int false "The number of articles that you can get the result" default(50) mininum(1) maxinum(50)
 // @Success 200 {object} entity.Article
 // @Router /articles [get]
 func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
-	payload, err := a.model.Get(r.Context())
+	getArticleForm := new(form.GetArticleForm)
+	msg, err := getArticleForm.Validate(r)
+
+	if err != nil {
+		log.Printf("Error: %+v\n", xerrors.Errorf("failed to validate form value: %w", err))
+		respondWithError(w, http.StatusBadRequest, msg)
+		return
+	}
+
+	payload, err := a.model.Get(r.Context(), getArticleForm)
 
 	if err != nil {
 		log.Printf("Error: %+v\n", err)
@@ -46,11 +61,20 @@ func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Tags articles
 // @Accept  json
 // @Produce  json
-// @Param   article body entity.Article true  "article"
+// @Param   article body form.CreateArticleForm true  "article"
 // @Success 200
 // @Router /articles [post]
 func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
-	err := a.model.Create(r.Context(), r)
+	createArticleForm := new(form.CreateArticleForm)
+	msg, err := createArticleForm.Validate(r)
+
+	if err != nil {
+		log.Printf("Error: %+v\n", xerrors.Errorf("failed to validate form value: %w", err))
+		respondWithError(w, http.StatusBadRequest, msg)
+		return
+	}
+
+	err = a.model.Create(r.Context(), r, createArticleForm)
 
 	if err != nil {
 		log.Printf("Error: %+v\n", err)
@@ -58,7 +82,7 @@ func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, map[string]string{"message": "Successfully Created"})
+	respondWithJSON(w, http.StatusOK, map[string]string{"message": "Successfully Created"})
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {

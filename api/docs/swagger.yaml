@@ -21,13 +21,28 @@ definitions:
         example: https://blog.kentarom.com/learn-aws-cdk/
         type: string
     type: object
+  form.CreateArticleForm:
+    properties:
+      pub_date:
+        example: "2019-01-19T14:13:01Z"
+        type: string
+      title:
+        example: AWS CDKでサーバーレスアプリケーションのデプロイを試す
+        type: string
+      url:
+        example: https://blog.kentarom.com/learn-aws-cdk/
+        type: string
+    required:
+    - pub_date
+    - title
+    - url
+    type: object
 host: localhost:8080
 info:
   contact: {}
   description: This is a Spider API server.
   license:
     name: MIT
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
   title: Spider API
   version: "1.0"
 paths:
@@ -35,6 +50,31 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - default: "2019-01-19T14:13:01Z"
+        description: Only articles published at or after this time are returned.
+        in: query
+        name: since
+        type: string
+      - description: Only articles published at or before this time are returned.
+        in: query
+        name: until
+        type: string
+      - default: desc
+        description: The direction of the sort by pub_date
+        enum:
+        - desc
+        - asc
+        in: query
+        name: sort
+        type: string
+      - default: 50
+        description: The number of articles that you can get the result
+        in: query
+        maximum: 50
+        minimum: 1
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
@@ -55,7 +95,7 @@ paths:
         name: article
         required: true
         schema:
-          $ref: '#/definitions/entity.Article'
+          $ref: '#/definitions/form.CreateArticleForm'
           type: object
       produces:
       - application/json
