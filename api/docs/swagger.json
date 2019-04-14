@@ -24,6 +24,42 @@
                     "articles"
                 ],
                 "summary": "Get articles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "2019-01-19T14:13:01Z",
+                        "description": "Only articles published at or after this time are returned.",
+                        "name": "since",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "2019-01-19T14:13:01Z",
+                        "description": "Unused parameter (deprecated)",
+                        "name": "until",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "desc",
+                            "asc"
+                        ],
+                        "type": "string",
+                        "default": "desc",
+                        "description": "The direction of the sort by pub_date",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 50,
+                        "minimum": 1,
+                        "type": "integer",
+                        "default": 50,
+                        "description": "The number of articles that you can get the result",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -53,7 +89,7 @@
                         "required": true,
                         "schema": {
                             "type": "object",
-                            "$ref": "#/definitions/entity.Article"
+                            "$ref": "#/definitions/form.CreateArticleForm"
                         }
                     }
                 ],
@@ -86,6 +122,28 @@
                 "updated_at": {
                     "type": "string",
                     "example": "2019-04-06T16:03:31Z"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "https://blog.kentarom.com/learn-aws-cdk/"
+                }
+            }
+        },
+        "form.CreateArticleForm": {
+            "type": "object",
+            "required": [
+                "pub_date",
+                "title",
+                "url"
+            ],
+            "properties": {
+                "pub_date": {
+                    "type": "string",
+                    "example": "2019-01-19T14:13:01Z"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "AWS CDKでサーバーレスアプリケーションのデプロイを試す"
                 },
                 "url": {
                     "type": "string",

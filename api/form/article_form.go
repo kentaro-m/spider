@@ -9,10 +9,10 @@ import (
 )
 
 type GetArticleForm struct {
-	Since time.Time
-	Until time.Time
-	Limit int `validate:"omitempty,min=1,max=50"`
-	Sort string `validate:"omitempty,oneof=desc asc"`
+	Since time.Time `example:"2019-01-19T14:13:01Z"`
+	Until time.Time `example:"2019-01-19T14:13:01Z"`
+	Limit int `validate:"omitempty,min=1,max=50" example:"50"`
+	Sort string `validate:"omitempty,oneof=desc asc" example:"desc"`
 }
 
 func (g *GetArticleForm) FieldMap(r *http.Request) binding.FieldMap {
