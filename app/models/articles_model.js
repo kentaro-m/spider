@@ -1,8 +1,7 @@
 const uuidv4 = require('uuid/v4')
 const moment = require('moment-timezone')
-const ArticlesRepositry = require('../repositories/articles_repository')
 const ArticleEntity = require('../entities/article_entity')
-const { getArticles } = require('../lib/utils')
+const { getArticles, postArticle, filterNewArticles } = require('../lib/utils')
 const config = require('config')
 
 module.exports = class ArticlesModel {
@@ -11,30 +10,30 @@ module.exports = class ArticlesModel {
 
   async add () {
     try {
-      const articlesRepositry = new ArticlesRepositry()
+      const articles = await getArticles(config.sources)
 
-      const articles = await getArticles(config.feedUrls)
+      const newArticles = filterNewArticles(articles, 1)
 
-      for (const article of articles) {
+      if (newArticles.length === 0) {
+        return 'not exist new articles'
+      }
+
+      for (const article of newArticles) {
         const articleEntity = new ArticleEntity(
           uuidv4(),
           article.title,
           article.link,
-          moment(article.pubDate).tz("Asia/Tokyo").format('YYYY-MM-DD HH:mm:ss'),
-          moment().tz("Asia/Tokyo").format('YYYY-MM-DD HH:mm:ss'),
-          moment().tz("Asia/Tokyo").format('YYYY-MM-DD HH:mm:ss')
+          moment(article.pubDate).tz("Asia/Tokyo"),
+          moment().tz("Asia/Tokyo"),
+          moment().tz("Asia/Tokyo")
         )
 
-        await articlesRepositry.create(articleEntity)
-      }
+        await postArticle(articleEntity)
 
-      articlesRepositry.end()
+        return 'success to add new articles'
+      }
     } catch (error) {
       throw error
     }
-  }
-
-  async get () {
-
   }
 }

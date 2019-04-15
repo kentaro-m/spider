@@ -1,9 +1,6 @@
-const BaseEntity = require('./base_entity')
-
-module.exports = class ArticleEntity extends BaseEntity {
+module.exports = class ArticleEntity {
 
   constructor (id, title, url, pubDate, createdAt, updatedAt) {
-    super()
     this._id = id
     this._title = title
     this._url = url
