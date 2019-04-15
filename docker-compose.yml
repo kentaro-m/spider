@@ -30,4 +30,4 @@ services:
       - ./db/init:/docker-entrypoint-initdb.d
     ports:
       - 3306:3306
-    env_file: .env
+    env_file: ./db/.env
