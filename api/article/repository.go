@@ -1,10 +1,8 @@
-package repository
+package article
 
 import (
 	"context"
 	"database/sql"
-	"github.com/kentaro-m/spider/api/entity"
-	"github.com/kentaro-m/spider/api/form"
 	"golang.org/x/xerrors"
 )
 
@@ -15,18 +13,18 @@ func NewArticleRepository(Conn *sql.DB) ArticleRepository {
 }
 
 type ArticleRepository interface {
-	GetNewArticles(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
-	GetArticlesBySince(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
-	GetArticlesByUntil(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
-	GetArticlesBySinceAndUntil(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
-	Create(ctx context.Context, a *entity.Article) error
+	GetNewArticles(ctx context.Context, g *GetArticleForm) ([]*Article, error)
+	GetArticlesBySince(ctx context.Context, g *GetArticleForm) ([]*Article, error)
+	GetArticlesByUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error)
+	GetArticlesBySinceAndUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error)
+	Create(ctx context.Context, a *Article) error
 }
 
 type articleRepository struct {
 	Conn *sql.DB
 }
 
-func (ar articleRepository) GetNewArticles(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+func (ar articleRepository) GetNewArticles(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
 	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date DESC LIMIT ?"
 
 	if g.Sort == "asc" {
@@ -47,9 +45,9 @@ func (ar articleRepository) GetNewArticles(ctx context.Context, g *form.GetArtic
 		}
 	}()
 
-	payload := make([]*entity.Article, 0)
+	payload := make([]*Article, 0)
 	for rows.Next() {
-		data := new(entity.Article)
+		data := new(Article)
 		err := rows.Scan(
 			&data.ID,
 			&data.Title,
@@ -69,7 +67,7 @@ func (ar articleRepository) GetNewArticles(ctx context.Context, g *form.GetArtic
 	return payload, err
 }
 
-func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
 	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date DESC LIMIT ?"
 
 	if g.Sort == "asc" {
@@ -90,9 +88,9 @@ func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *form.GetA
 		}
 	}()
 
-	payload := make([]*entity.Article, 0)
+	payload := make([]*Article, 0)
 	for rows.Next() {
-		data := new(entity.Article)
+		data := new(Article)
 		err := rows.Scan(
 			&data.ID,
 			&data.Title,
@@ -112,7 +110,7 @@ func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *form.GetA
 	return payload, err
 }
 
-func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
 	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
 
 	if g.Sort == "asc" {
@@ -133,9 +131,9 @@ func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *form.GetA
 		}
 	}()
 
-	payload := make([]*entity.Article, 0)
+	payload := make([]*Article, 0)
 	for rows.Next() {
-		data := new(entity.Article)
+		data := new(Article)
 		err := rows.Scan(
 			&data.ID,
 			&data.Title,
@@ -155,7 +153,7 @@ func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *form.GetA
 	return payload, err
 }
 
-func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
+func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
 	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
 
 	if g.Sort == "asc" {
@@ -176,9 +174,9 @@ func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *f
 		}
 	}()
 
-	payload := make([]*entity.Article, 0)
+	payload := make([]*Article, 0)
 	for rows.Next() {
-		data := new(entity.Article)
+		data := new(Article)
 		err := rows.Scan(
 			&data.ID,
 			&data.Title,
@@ -198,7 +196,7 @@ func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *f
 	return payload, err
 }
 
-func (ar *articleRepository) Create(ctx context.Context, a *entity.Article) error {
+func (ar *articleRepository) Create(ctx context.Context, a *Article) error {
 	query := "INSERT INTO articles SET id = ?, title = ?, url = ?, pub_date = ?, created_at = ?, updated_at = ?"
 
 	stmt, err := ar.Conn.PrepareContext(ctx, query)

@@ -1,15 +1,13 @@
-package handler
+package article
 
 import (
 	"encoding/json"
-	"github.com/kentaro-m/spider/api/model"
-	"github.com/kentaro-m/spider/api/form"
 	"golang.org/x/xerrors"
 	"log"
 	"net/http"
 )
 
-func NewArticleHandler(m model.ArticleModel) ArticleHandler {
+func NewArticleHandler(m ArticleModel) ArticleHandler {
 	return &articleHandler{
 		model: m,
 	}
@@ -21,7 +19,7 @@ type ArticleHandler interface {
 }
 
 type articleHandler struct {
-	model model.ArticleModel
+	model ArticleModel
 }
 
 // GetArticle godoc
@@ -33,10 +31,10 @@ type articleHandler struct {
 // @Param until query string false "Only articles published at or before this time are returned."
 // @Param sort query string false "The direction of the sort by pub_date" default(desc) Enums(desc, asc)
 // @Param limit query int false "The number of articles that you can get the result" default(50) mininum(1) maxinum(50)
-// @Success 200 {object} entity.Article
+// @Success 200 {object} Article
 // @Router /articles [get]
 func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
-	getArticleForm := new(form.GetArticleForm)
+	getArticleForm := new(GetArticleForm)
 	msg, err := getArticleForm.Validate(r)
 
 	if err != nil {
@@ -61,11 +59,11 @@ func (a *articleHandler) Get(w http.ResponseWriter, r *http.Request) {
 // @Tags articles
 // @Accept  json
 // @Produce  json
-// @Param   article body form.CreateArticleForm true  "article"
+// @Param   article body CreateArticleForm true  "article"
 // @Success 200
 // @Router /articles [post]
 func (a *articleHandler) Create(w http.ResponseWriter, r *http.Request) {
-	createArticleForm := new(form.CreateArticleForm)
+	createArticleForm := new(CreateArticleForm)
 	msg, err := createArticleForm.Validate(r)
 
 	if err != nil {

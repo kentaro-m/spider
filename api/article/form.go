@@ -1,4 +1,4 @@
-package form
+package article
 
 import (
 	"github.com/mholt/binding"
