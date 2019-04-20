@@ -8,28 +8,56 @@ import (
 	"time"
 )
 
-type GetArticleForm struct {
+type getArticleForm struct {
 	Since time.Time `example:"2019-01-19T14:13:01Z"`
 	Until time.Time `example:"2019-01-19T14:13:01Z"`
 	Limit int `validate:"omitempty,min=1,max=50" example:"50"`
 	Sort string `validate:"omitempty,oneof=desc asc" example:"desc"`
 }
 
+type GetArticleForm struct {
+	getArticleForm
+}
+
+func (g *GetArticleForm) Since() time.Time {
+	return g.getArticleForm.Since
+}
+
+func (g *GetArticleForm) Until() time.Time {
+	return g.getArticleForm.Until
+}
+
+func (g *GetArticleForm) Limit() int {
+	if g.getArticleForm.Limit == 0 {
+		g.getArticleForm.Limit = 50
+	}
+
+	return g.getArticleForm.Limit
+}
+
+func (g *GetArticleForm) Sort() string {
+	if g.getArticleForm.Sort == "" {
+		g.getArticleForm.Sort = "desc"
+	}
+
+	return g.getArticleForm.Sort
+}
+
 func (g *GetArticleForm) FieldMap(r *http.Request) binding.FieldMap {
 	return binding.FieldMap{
-		&g.Since: binding.Field{
+		&g.getArticleForm.Since: binding.Field{
 			Form: "since",
 			Required: false,
 		},
-		&g.Until: binding.Field{
+		&g.getArticleForm.Until: binding.Field{
 			Form: "until",
 			Required: false,
 		},
-		&g.Limit: binding.Field{
+		&g.getArticleForm.Limit: binding.Field{
 			Form: "limit",
 			Required: false,
 		},
-		&g.Sort: binding.Field{
+		&g.getArticleForm.Sort: binding.Field{
 			Form: "sort",
 			Required: false,
 		},
@@ -91,23 +119,39 @@ func (g *GetArticleForm) Validate(r *http.Request) (string, error) {
 	return "", nil
 }
 
-type CreateArticleForm struct {
+type createArticleForm struct {
 	Title     string    `json:"title" validate:"required" example:"AWS CDKでサーバーレスアプリケーションのデプロイを試す"`
 	URL       string    `json:"url" validate:"required,url" example:"https://blog.kentarom.com/learn-aws-cdk/"`
 	PubDate   time.Time `json:"pub_date" validate:"required" example:"2019-01-19T14:13:01Z"`
 }
 
+type CreateArticleForm struct {
+	createArticleForm
+}
+
+func (c *CreateArticleForm) Title() string {
+	return c.createArticleForm.Title
+}
+
+func (c *CreateArticleForm) URL() string {
+	return c.createArticleForm.URL
+}
+
+func (c *CreateArticleForm) PubDate() time.Time {
+	return c.createArticleForm.PubDate
+}
+
 func (c *CreateArticleForm) FieldMap(r *http.Request) binding.FieldMap {
 	return binding.FieldMap{
-		&c.Title: binding.Field{
+		&c.createArticleForm.Title: binding.Field{
 			Form: "title",
 			Required: true,
 		},
-		&c.URL: binding.Field{
+		&c.createArticleForm.URL: binding.Field{
 			Form: "url",
 			Required: true,
 		},
-		&c.PubDate: binding.Field{
+		&c.createArticleForm.PubDate: binding.Field{
 			Form: "pub_date",
 			Required: true,
 		},

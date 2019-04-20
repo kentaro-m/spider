@@ -25,13 +25,13 @@ type articleRepository struct {
 }
 
 func (ar articleRepository) GetNewArticles(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date DESC LIMIT ?"
+	query := "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date DESC LIMIT ?"
 
-	if g.Sort == "asc" {
-		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date ASC LIMIT ?"
+	if g.Sort() == "asc" {
+		query = "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date ASC LIMIT ?"
 	}
 
-	rows, err := ar.Conn.QueryContext(ctx, query, g.Limit)
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Limit())
 
 	if err != nil {
 		return nil, xerrors.Errorf("failed to execute a query: %w", err)
@@ -49,12 +49,12 @@ func (ar articleRepository) GetNewArticles(ctx context.Context, g *GetArticleFor
 	for rows.Next() {
 		data := new(Article)
 		err := rows.Scan(
-			&data.ID,
-			&data.Title,
-			&data.URL,
-			&data.PubDate,
-			&data.CreatedAt,
-			&data.UpdatedAt,
+			&data.article.ID,
+			&data.article.Title,
+			&data.article.URL,
+			&data.article.PubDate,
+			&data.article.CreatedAt,
+			&data.article.UpdatedAt,
 		)
 
 		if err != nil {
@@ -68,13 +68,13 @@ func (ar articleRepository) GetNewArticles(ctx context.Context, g *GetArticleFor
 }
 
 func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date DESC LIMIT ?"
+	query := "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date DESC LIMIT ?"
 
-	if g.Sort == "asc" {
-		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date ASC LIMIT ?"
+	if g.Sort() == "asc" {
+		query = "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date ASC LIMIT ?"
 	}
 
-	rows, err := ar.Conn.QueryContext(ctx, query, g.Since.Format("2006-01-02 15:04:05"), g.Limit)
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Since().Format("2006-01-02 15:04:05"), g.Limit())
 
 	if err != nil {
 		return nil, xerrors.Errorf("failed to execute a query: %w", err)
@@ -92,12 +92,12 @@ func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *GetArticl
 	for rows.Next() {
 		data := new(Article)
 		err := rows.Scan(
-			&data.ID,
-			&data.Title,
-			&data.URL,
-			&data.PubDate,
-			&data.CreatedAt,
-			&data.UpdatedAt,
+			&data.article.ID,
+			&data.article.Title,
+			&data.article.URL,
+			&data.article.PubDate,
+			&data.article.CreatedAt,
+			&data.article.UpdatedAt,
 		)
 
 		if err != nil {
@@ -111,13 +111,13 @@ func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *GetArticl
 }
 
 func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
+	query := "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
 
-	if g.Sort == "asc" {
-		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date ASC LIMIT ?"
+	if g.Sort() == "asc" {
+		query = "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date ASC LIMIT ?"
 	}
 
-	rows, err := ar.Conn.QueryContext(ctx, query, g.Until.Format("2006-01-02 15:04:05"), g.Limit)
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Until().Format("2006-01-02 15:04:05"), g.Limit())
 
 	if err != nil {
 		return nil, xerrors.Errorf("failed to execute a query: %w", err)
@@ -135,12 +135,12 @@ func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *GetArticl
 	for rows.Next() {
 		data := new(Article)
 		err := rows.Scan(
-			&data.ID,
-			&data.Title,
-			&data.URL,
-			&data.PubDate,
-			&data.CreatedAt,
-			&data.UpdatedAt,
+			&data.article.ID,
+			&data.article.Title,
+			&data.article.URL,
+			&data.article.PubDate,
+			&data.article.CreatedAt,
+			&data.article.UpdatedAt,
 		)
 
 		if err != nil {
@@ -154,13 +154,13 @@ func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *GetArticl
 }
 
 func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	query := "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
+	query := "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
 
-	if g.Sort == "asc" {
-		query = "SELECT id, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date ASC LIMIT ?"
+	if g.Sort() == "asc" {
+		query = "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date ASC LIMIT ?"
 	}
 
-	rows, err := ar.Conn.QueryContext(ctx, query, g.Since.Format("2006-01-02 15:04:05"), g.Until.Format("2006-01-02 15:04:05"), g.Limit)
+	rows, err := ar.Conn.QueryContext(ctx, query, g.Since().Format("2006-01-02 15:04:05"), g.Until().Format("2006-01-02 15:04:05"), g.Limit())
 
 	if err != nil {
 		return nil, xerrors.Errorf("failed to execute a query: %w", err)
@@ -178,12 +178,12 @@ func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *G
 	for rows.Next() {
 		data := new(Article)
 		err := rows.Scan(
-			&data.ID,
-			&data.Title,
-			&data.URL,
-			&data.PubDate,
-			&data.CreatedAt,
-			&data.UpdatedAt,
+			&data.article.ID,
+			&data.article.Title,
+			&data.article.URL,
+			&data.article.PubDate,
+			&data.article.CreatedAt,
+			&data.article.UpdatedAt,
 		)
 
 		if err != nil {
@@ -197,7 +197,7 @@ func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *G
 }
 
 func (ar *articleRepository) Create(ctx context.Context, a *Article) error {
-	query := "INSERT INTO articles SET id = ?, title = ?, url = ?, pub_date = ?, created_at = ?, updated_at = ?"
+	query := "INSERT INTO articles SET ID = ?, title = ?, url = ?, pub_date = ?, created_at = ?, updated_at = ?"
 
 	stmt, err := ar.Conn.PrepareContext(ctx, query)
 
@@ -205,7 +205,7 @@ func (ar *articleRepository) Create(ctx context.Context, a *Article) error {
 		return xerrors.Errorf("failed to create a prepared statement: %w", err)
 	}
 
-	_, err = stmt.ExecContext(ctx, a.ID, a.Title, a.URL, a.PubDate.Format("2006-01-02 15:04:05"), a.CreatedAt.Format("2006-01-02 15:04:05"), a.UpdatedAt.Format("2006-01-02 15:04:05"))
+	_, err = stmt.ExecContext(ctx, a.ID(), a.Title(), a.URL(), a.PubDate().Format("2006-01-02 15:04:05"), a.CreatedAt().Format("2006-01-02 15:04:05"), a.UpdatedAt().Format("2006-01-02 15:04:05"))
 
 	if err != nil {
 		return xerrors.Errorf("failed to execute a prepared statement: %w", err)

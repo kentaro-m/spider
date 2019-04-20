@@ -24,15 +24,7 @@ type articleModel struct {
 }
 
 func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	if g.Limit == 0 {
-		g.Limit = 50
-	}
-
-	if g.Sort == "" {
-		g.Sort = "desc"
-	}
-
-	if !g.Until.IsZero() && !g.Since.IsZero() {
+	if !g.Until().IsZero() && !g.Since().IsZero() {
 		payload, err := a.repo.GetArticlesBySinceAndUntil(ctx, g)
 
 		if err != nil {
@@ -42,7 +34,7 @@ func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, e
 		return payload, err
 	}
 
-	if g.Until.IsZero() && !g.Since.IsZero() {
+	if g.Until().IsZero() && !g.Since().IsZero() {
 		payload, err := a.repo.GetArticlesBySince(ctx, g)
 
 		if err != nil {
@@ -52,7 +44,7 @@ func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, e
 		return payload, err
 	}
 
-	if !g.Until.IsZero() && g.Since.IsZero() {
+	if !g.Until().IsZero() && g.Since().IsZero() {
 		payload, err := a.repo.GetArticlesByUntil(ctx, g)
 
 		if err != nil {
@@ -75,12 +67,14 @@ func (a articleModel) Create(ctx context.Context, r *http.Request, c *CreateArti
 	timeStamp := time.Now().UTC().In(time.FixedZone("Asia/Tokyo", 9*60*60))
 
 	article := Article{
-		ID:        uuid.NewV4().String(),
-		Title: c.Title,
-		URL: c.URL,
-		PubDate: c.PubDate,
-		CreatedAt: timeStamp,
-		UpdatedAt: timeStamp,
+		article{
+			ID:        uuid.NewV4().String(),
+			Title:     c.Title(),
+			URL:       c.URL(),
+			PubDate:   c.PubDate(),
+			CreatedAt: timeStamp,
+			UpdatedAt: timeStamp,
+		},
 	}
 
 	err := a.repo.Create(r.Context(), &article)
