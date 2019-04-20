@@ -44,7 +44,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	articleRepository := repository.NewArticleRepository(connection.SQL)
+	articleRepository := repository.NewArticleRepository(connection)
 	articleModel := model.NewArticleModel(articleRepository)
 	articleHandler := handler.NewArticleHandler(articleModel)
 
