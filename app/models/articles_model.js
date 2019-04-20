@@ -15,7 +15,7 @@ module.exports = class ArticlesModel {
       const newArticles = filterNewArticles(articles, 1)
 
       if (newArticles.length === 0) {
-        return 'not exist new articles'
+        throw new Error('not exist new articles')
       }
 
       for (const article of newArticles) {
@@ -29,8 +29,6 @@ module.exports = class ArticlesModel {
         )
 
         await postArticle(articleEntity)
-
-        return 'success to add new articles'
       }
     } catch (error) {
       throw error
