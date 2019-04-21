@@ -18,6 +18,8 @@ module.exports = class ArticlesModel {
         throw new Error('not exist new articles')
       }
 
+      const results = []
+
       for (const article of newArticles) {
         const articleEntity = new ArticleEntity(
           uuidv4(),
@@ -28,8 +30,18 @@ module.exports = class ArticlesModel {
           moment().tz("Asia/Tokyo")
         )
 
+        results.push({
+          id: articleEntity.id,
+          title: articleEntity.title,
+          pub_date: articleEntity.pubDate.format(),
+          created_at: articleEntity.createdAt.format(),
+          updated_at: articleEntity.updatedAt.format()
+        })
+
         await postArticle(articleEntity)
       }
+
+      return results
     } catch (error) {
       throw error
     }
