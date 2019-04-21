@@ -1,10 +1,7 @@
-package model
+package article
 
 import (
 	"context"
-	"github.com/kentaro-m/spider/api/entity"
-	"github.com/kentaro-m/spider/api/repository"
-	"github.com/kentaro-m/spider/api/form"
 	"github.com/satori/go.uuid"
 	"golang.org/x/xerrors"
 	"net/http"
@@ -12,30 +9,22 @@ import (
 )
 
 type ArticleModel interface {
-	Get(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error)
-	Create(ctx context.Context, r *http.Request, c *form.CreateArticleForm) error
+	Get(ctx context.Context, g *GetArticleForm) ([]*Article, error)
+	Create(ctx context.Context, r *http.Request, c *CreateArticleForm) error
 }
 
-func NewArticleModel(r repository.ArticleRepository) ArticleModel {
+func NewArticleModel(r ArticleRepository) ArticleModel {
 	return &articleModel{
 		repo: r,
 	}
 }
 
 type articleModel struct {
-	repo repository.ArticleRepository
+	repo ArticleRepository
 }
 
-func (a articleModel) Get(ctx context.Context, g *form.GetArticleForm) ([]*entity.Article, error) {
-	if g.Limit == 0 {
-		g.Limit = 50
-	}
-
-	if g.Sort == "" {
-		g.Sort = "desc"
-	}
-
-	if !g.Until.IsZero() && !g.Since.IsZero() {
+func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
+	if !g.Until().IsZero() && !g.Since().IsZero() {
 		payload, err := a.repo.GetArticlesBySinceAndUntil(ctx, g)
 
 		if err != nil {
@@ -45,7 +34,7 @@ func (a articleModel) Get(ctx context.Context, g *form.GetArticleForm) ([]*entit
 		return payload, err
 	}
 
-	if g.Until.IsZero() && !g.Since.IsZero() {
+	if g.Until().IsZero() && !g.Since().IsZero() {
 		payload, err := a.repo.GetArticlesBySince(ctx, g)
 
 		if err != nil {
@@ -55,7 +44,7 @@ func (a articleModel) Get(ctx context.Context, g *form.GetArticleForm) ([]*entit
 		return payload, err
 	}
 
-	if !g.Until.IsZero() && g.Since.IsZero() {
+	if !g.Until().IsZero() && g.Since().IsZero() {
 		payload, err := a.repo.GetArticlesByUntil(ctx, g)
 
 		if err != nil {
@@ -74,16 +63,18 @@ func (a articleModel) Get(ctx context.Context, g *form.GetArticleForm) ([]*entit
 	return payload, err
 }
 
-func (a articleModel) Create(ctx context.Context, r *http.Request, c *form.CreateArticleForm) error {
+func (a articleModel) Create(ctx context.Context, r *http.Request, c *CreateArticleForm) error {
 	timeStamp := time.Now().UTC().In(time.FixedZone("Asia/Tokyo", 9*60*60))
 
-	article := entity.Article{
-		ID:        uuid.NewV4().String(),
-		Title: c.Title,
-		URL: c.URL,
-		PubDate: c.PubDate,
-		CreatedAt: timeStamp,
-		UpdatedAt: timeStamp,
+	article := Article{
+		article{
+			ID:        uuid.NewV4().String(),
+			Title:     c.Title(),
+			URL:       c.URL(),
+			PubDate:   c.PubDate(),
+			CreatedAt: timeStamp,
+			UpdatedAt: timeStamp,
+		},
 	}
 
 	err := a.repo.Create(r.Context(), &article)

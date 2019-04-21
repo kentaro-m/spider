@@ -1,10 +1,8 @@
 package main
 
 import (
+	"github.com/kentaro-m/spider/api/article"
 	"github.com/kentaro-m/spider/api/driver"
-	"github.com/kentaro-m/spider/api/handler"
-	"github.com/kentaro-m/spider/api/model"
-	"github.com/kentaro-m/spider/api/repository"
 	"golang.org/x/xerrors"
 	"log"
 	"os"
@@ -44,9 +42,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	articleRepository := repository.NewArticleRepository(connection.SQL)
-	articleModel := model.NewArticleModel(articleRepository)
-	articleHandler := handler.NewArticleHandler(articleModel)
+	articleRepository := article.NewArticleRepository(connection)
+	articleModel := article.NewArticleModel(articleRepository)
+	articleHandler := article.NewArticleHandler(articleModel)
 
 	r := chi.NewRouter()
 
