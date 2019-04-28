@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/kentaro-m/spider/api/article"
 	"github.com/kentaro-m/spider/api/driver"
 	"golang.org/x/xerrors"
@@ -28,14 +29,50 @@ func main() {
 		os.Exit(1)
 	}
 
-	dbHost := os.Getenv("DB_HOST")
-	dbPort := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_PASSWORD")
 	dbCharset := os.Getenv("DB_CHARSET")
+	env := os.Getenv("ENVIRONMENT")
 
-	connection, err := driver.ConnectDB(dbHost, dbPort, dbUser, dbPassword, dbName, dbCharset)
+	// Local DB connection info
+	dbHost := os.Getenv("LOCAL_DB_HOST")
+	dbPort := os.Getenv("LOCAL_DB_PORT")
+	dbName := os.Getenv("LOCAL_DB_NAME")
+	dbUser := os.Getenv("LOCAL_DB_USER")
+	dbPass := os.Getenv("LOCAL_DB_PASSWORD")
+
+	// CloudSQL connection info
+	cProjectId := os.Getenv("CLOUDSQL_PROJECT_ID")
+	cRegion := os.Getenv("CLOUDSQL_REGION_NAME")
+	cInstance := os.Getenv("CLOUDSQL_INSTANCE_NAME")
+	cName := os.Getenv("CLOUDSQL_DB_NAME")
+	cUser := os.Getenv("CLOUDSQL_USER")
+	cPass := os.Getenv("CLOUDSQL_PASSWORD")
+
+	var dsn string
+
+	if env == "prd" {
+		dsn = fmt.Sprintf(
+			"%s:%s@unix(/cloudsql/%s:%s:%s)/%s?charset=%s&parseTime=true",
+			cUser,
+			cPass,
+			cProjectId,
+			cRegion,
+			cInstance,
+			cName,
+			dbCharset,
+		)
+	} else {
+		dsn = fmt.Sprintf(
+			"%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true",
+			dbUser,
+			dbPass,
+			dbHost,
+			dbPort,
+			dbName,
+			dbCharset,
+		)
+	}
+
+	connection, err := driver.ConnectDB(dsn)
 
 	if err != nil {
 		log.Printf("Error: %+v\n", xerrors.Errorf("failed to connect to DB: %w", err))
