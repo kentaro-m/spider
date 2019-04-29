@@ -1,96 +1,98 @@
 {
-  "sources": [
-    {
-      "name": "DMM inside",
-      "url": "https://inside.dmm.com/rss"
-    },
-    {
-      "name": "Hatena Developer Blog",
-      "url": "http://developer.hatenastaff.com/rss"
-    },
-    {
-      "name": "クックパッド開発者ブログ",
-      "url": "http://techlife.cookpad.com/rss"
-    },
-    {
-      "name": "pixiv inside",
-      "url": "https://inside.pixiv.blog/feed"
-    },
-    {
-      "name": "Mercari Engineering Blog",
-      "url": "http://tech.mercari.com/rss"
-    },
-    {
-      "name": "BASE開発チームブログ",
-      "url": "http://devblog.thebase.in/rss"
-    },
-    {
-      "name": "LINE Engineering Blog",
-      "url": "https://engineering.linecorp.com/ja/blog/rss2"
-    },
-    {
-      "name": "Amazon Web Services ブログ",
-      "url": "https://aws.amazon.com/jp/blogs/news/feed/"
-    },
-    {
-      "name": "ChatWork Creator's Note",
-      "url": "http://creators-note.chatwork.com/rss"
-    },
-    {
-      "name": "Gunosy Tech Blog",
-      "url": "https://tech.gunosy.io/rss"
-    },
-    {
-      "name": "Gunosy Blockchain Blog",
-      "url": "http://blockchain.gunosy.io/rss"
-    },
-    {
-      "name": "Start Today Technologies TECH BLOG",
-      "url": "https://tech.starttoday-tech.com/rss"
-    },
-    {
-      "name": "Cybozu Inside Out | サイボウズエンジニアのブログ",
-      "url": "http://blog.cybozu.io/rss"
-    },
-    {
-      "name": "Feedforce Developer Blog",
-      "url": "https://developer.feedforce.jp/rss"
-    },
-    {
-      "name": "Medley Developer Blog",
-      "url": "https://developer.medley.jp/rss"
-    },
-    {
-      "name": "LIFULL Creators Blog",
-      "url": "http://www.lifull.blog/rss"
-    },
-    {
-      "name": "Innovator Japan Engineers’ Blog",
-      "url": "https://tech.innovator.jp.net/rss"
-    },
-    {
-      "name": "ChatWork Creator",
-      "url": "http://creators-note.chatwork.com/rss"
-    },
-    {
-      "name": "Misoca開発者ブログ",
-      "url": "http://tech.misoca.jp/rss"
-    },
-    {
-      "name": "コネヒト開発者ブログ",
-      "url": "http://tech.connehito.com/rss"
-    },
-    {
-      "name": "ぐるなびをちょっと良くするエンジニアブログ",
-      "url": "http://developers.gnavi.co.jp/rss"
-    },
-    {
-      "name": "freee Developers Blog",
-      "url": "https://developers.freee.co.jp/rss"
-    },
-    {
-      "name": "エムスリーテックブログ",
-      "url": "http://www.m3tech.blog/rss"
-    }
-  ]
+  "crawler": {
+    "sources": [
+      {
+        "name": "DMM inside",
+        "url": "https://inside.dmm.com/rss"
+      },
+      {
+        "name": "Hatena Developer Blog",
+        "url": "http://developer.hatenastaff.com/rss"
+      },
+      {
+        "name": "クックパッド開発者ブログ",
+        "url": "http://techlife.cookpad.com/rss"
+      },
+      {
+        "name": "pixiv inside",
+        "url": "https://inside.pixiv.blog/feed"
+      },
+      {
+        "name": "Mercari Engineering Blog",
+        "url": "http://tech.mercari.com/rss"
+      },
+      {
+        "name": "BASE開発チームブログ",
+        "url": "http://devblog.thebase.in/rss"
+      },
+      {
+        "name": "LINE Engineering Blog",
+        "url": "https://engineering.linecorp.com/ja/blog/rss2"
+      },
+      {
+        "name": "Amazon Web Services ブログ",
+        "url": "https://aws.amazon.com/jp/blogs/news/feed/"
+      },
+      {
+        "name": "ChatWork Creator's Note",
+        "url": "http://creators-note.chatwork.com/rss"
+      },
+      {
+        "name": "Gunosy Tech Blog",
+        "url": "https://tech.gunosy.io/rss"
+      },
+      {
+        "name": "Gunosy Blockchain Blog",
+        "url": "http://blockchain.gunosy.io/rss"
+      },
+      {
+        "name": "Start Today Technologies TECH BLOG",
+        "url": "https://tech.starttoday-tech.com/rss"
+      },
+      {
+        "name": "Cybozu Inside Out | サイボウズエンジニアのブログ",
+        "url": "http://blog.cybozu.io/rss"
+      },
+      {
+        "name": "Feedforce Developer Blog",
+        "url": "https://developer.feedforce.jp/rss"
+      },
+      {
+        "name": "Medley Developer Blog",
+        "url": "https://developer.medley.jp/rss"
+      },
+      {
+        "name": "LIFULL Creators Blog",
+        "url": "http://www.lifull.blog/rss"
+      },
+      {
+        "name": "Innovator Japan Engineers’ Blog",
+        "url": "https://tech.innovator.jp.net/rss"
+      },
+      {
+        "name": "ChatWork Creator",
+        "url": "http://creators-note.chatwork.com/rss"
+      },
+      {
+        "name": "Misoca開発者ブログ",
+        "url": "http://tech.misoca.jp/rss"
+      },
+      {
+        "name": "コネヒト開発者ブログ",
+        "url": "http://tech.connehito.com/rss"
+      },
+      {
+        "name": "ぐるなびをちょっと良くするエンジニアブログ",
+        "url": "http://developers.gnavi.co.jp/rss"
+      },
+      {
+        "name": "freee Developers Blog",
+        "url": "https://developers.freee.co.jp/rss"
+      },
+      {
+        "name": "エムスリーテックブログ",
+        "url": "http://www.m3tech.blog/rss"
+      }
+    ]
+  }
 }

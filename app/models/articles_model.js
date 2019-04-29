@@ -1,35 +1,49 @@
-const uuidv4 = require('uuid/v4')
 const moment = require('moment-timezone')
-const ArticleEntity = require('../entities/article_entity')
-const { getArticles, postArticle, filterNewArticles } = require('../lib/utils')
+const ArticlesCrawler = require('../lib/articles_crawler')
+const ArticlesClient = require('../lib/articles_client')
 const config = require('config')
+
+require('dotenv').config()
 
 module.exports = class ArticlesModel {
   constructor () {
   }
 
-  async add () {
+  async crawl(req) {
     try {
-      const articles = await getArticles(config.sources)
+      const articlesCrawler = new ArticlesCrawler({
+        sources: config.crawler.sources,
+        since: req.query.since || 1
+      })
+      const articles = await articlesCrawler.get()
 
-      const newArticles = filterNewArticles(articles, 1)
-
-      if (newArticles.length === 0) {
+      if (articles.length === 0) {
         throw new Error('not exist new articles')
       }
 
-      for (const article of newArticles) {
-        const articleEntity = new ArticleEntity(
-          uuidv4(),
-          article.title,
-          article.link,
-          moment(article.pubDate).tz("Asia/Tokyo"),
-          moment().tz("Asia/Tokyo"),
-          moment().tz("Asia/Tokyo")
-        )
+      let baseUrl = `${process.env.API_PROTOCOL}://${process.env.API_HOST}/`
 
-        await postArticle(articleEntity)
+      if (process.env.API_PORT) {
+        baseUrl = `${process.env.API_PROTOCOL}://${process.env.API_HOST}:${process.env.API_PORT}/`
       }
+
+      const articlesClient = new ArticlesClient({
+        baseUrl
+      })
+      const results = []
+
+      for (const article of articles) {
+        const data = {
+          title: article.title,
+          url: article.link,
+          pub_date: moment(article.pubDate).tz("Asia/Tokyo"),
+        }
+
+        results.push(data)
+        await articlesClient.post(data)
+      }
+
+      return results
     } catch (error) {
       throw error
     }

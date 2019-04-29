@@ -19,8 +19,7 @@
     "moment-timezone": "^0.5.23",
     "morgan": "~1.9.0",
     "pug": "2.0.0-beta11",
-    "rss-parser": "^3.7.0",
-    "uuid": "^3.3.2"
+    "rss-parser": "^3.7.0"
   },
   "devDependencies": {
     "eslint": "^5.16.0",
