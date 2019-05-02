@@ -1,0 +1,7 @@
+runtime: nodejs10
+service: spider-app
+instance_class: B4
+manual_scaling:
+  instances: 1
+env_variables:
+  ENVIRONMENT: prd
