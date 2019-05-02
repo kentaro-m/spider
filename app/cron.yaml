@@ -1,0 +1,5 @@
+cron:
+  - description: "every 1 hours job"
+    url: /crawl?since=1
+    schedule: every 1 hours
+    target: spider-app

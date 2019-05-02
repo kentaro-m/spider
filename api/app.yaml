@@ -1,2 +1,4 @@
 runtime: go111
 service: spider-api
+env_variables:
+  ENVIRONMENT: prd
