@@ -10,5 +10,6 @@ CREATE TABLE `articles` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  INDEX `idx_pub_date` (`pub_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
