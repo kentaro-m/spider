@@ -2,6 +2,7 @@ package article
 
 import (
 	"context"
+	s "github.com/kentaro-m/spider/api/site"
 	"github.com/satori/go.uuid"
 	"golang.org/x/xerrors"
 	"net/http"
@@ -9,23 +10,25 @@ import (
 )
 
 type ArticleModel interface {
-	Get(ctx context.Context, g *GetArticleForm) ([]*Article, error)
+	Get(ctx context.Context, g *GetArticleForm) ([]*Item, error)
 	Create(ctx context.Context, r *http.Request, c *CreateArticleForm) error
 }
 
-func NewArticleModel(r ArticleRepository) ArticleModel {
+func NewArticleModel(ar ArticleRepository, sr s.SiteRepository) ArticleModel {
 	return &articleModel{
-		repo: r,
+		aRepo: ar,
+		sRepo: sr,
 	}
 }
 
 type articleModel struct {
-	repo ArticleRepository
+	aRepo ArticleRepository
+	sRepo s.SiteRepository
 }
 
-func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
+func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Item, error) {
 	if !g.Until().IsZero() && !g.Since().IsZero() {
-		payload, err := a.repo.GetArticlesBySinceAndUntil(ctx, g)
+		payload, err := a.aRepo.GetArticlesBySinceAndUntil(ctx, g)
 
 		if err != nil {
 			return nil, xerrors.Errorf("failed to get articles from DB: %w", err)
@@ -35,7 +38,7 @@ func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, e
 	}
 
 	if g.Until().IsZero() && !g.Since().IsZero() {
-		payload, err := a.repo.GetArticlesBySince(ctx, g)
+		payload, err := a.aRepo.GetArticlesBySince(ctx, g)
 
 		if err != nil {
 			return nil, xerrors.Errorf("failed to get articles from DB: %w", err)
@@ -45,7 +48,7 @@ func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, e
 	}
 
 	if !g.Until().IsZero() && g.Since().IsZero() {
-		payload, err := a.repo.GetArticlesByUntil(ctx, g)
+		payload, err := a.aRepo.GetArticlesByUntil(ctx, g)
 
 		if err != nil {
 			return nil, xerrors.Errorf("failed to get articles from DB: %w", err)
@@ -54,7 +57,7 @@ func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, e
 		return payload, err
 	}
 
-	payload, err := a.repo.GetNewArticles(ctx, g)
+	payload, err := a.aRepo.GetNewArticles(ctx, g)
 
 	if err != nil {
 		return nil, xerrors.Errorf("failed to get articles from DB: %w", err)
@@ -66,18 +69,47 @@ func (a articleModel) Get(ctx context.Context, g *GetArticleForm) ([]*Article, e
 func (a articleModel) Create(ctx context.Context, r *http.Request, c *CreateArticleForm) error {
 	timeStamp := time.Now().UTC().In(time.FixedZone("Asia/Tokyo", 9*60*60))
 
+	getSiteForm := s.GetSiteForm{
+		Title: c.SiteTitle(),
+	}
+
+	data, err := a.sRepo.GetSiteInfo(r.Context(), &getSiteForm)
+
+	if err != nil {
+		return xerrors.Errorf("failed to get site info from DB: %w", err)
+	}
+
+	siteID := data.ID
+
+	if siteID == "" {
+		site := s.Site{
+			ID: uuid.NewV4().String(),
+			Title: c.SiteTitle(),
+			URL: c.SiteURL(),
+			CreatedAt: timeStamp,
+			UpdatedAt: timeStamp,
+		}
+
+		siteID, err = a.sRepo.Create(r.Context(), &site)
+
+		if err != nil {
+			return xerrors.Errorf("failed to insert site info to DB: %w", err)
+		}
+	}
+
 	article := Article{
 		article{
 			ID:        uuid.NewV4().String(),
 			Title:     c.Title(),
 			URL:       c.URL(),
 			PubDate:   c.PubDate(),
+			SiteID:    siteID,
 			CreatedAt: timeStamp,
 			UpdatedAt: timeStamp,
 		},
 	}
 
-	err := a.repo.Create(r.Context(), &article)
+	err = a.aRepo.Create(r.Context(), &article)
 
 	if err != nil {
 		return xerrors.Errorf("failed to insert an article to DB: %w", err)

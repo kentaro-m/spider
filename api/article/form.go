@@ -123,6 +123,8 @@ type createArticleForm struct {
 	Title     string    `json:"title" validate:"required" example:"AWS CDKでサーバーレスアプリケーションのデプロイを試す"`
 	URL       string    `json:"url" validate:"required,url" example:"https://blog.kentarom.com/learn-aws-cdk/"`
 	PubDate   time.Time `json:"pub_date" validate:"required" example:"2019-01-19T14:13:01Z"`
+	SiteTitle string    `json:"site_title" example:"Learn Something New"`
+	SiteURL   string    `json:"site_url" example:"https://blog.kentarom.com"`
 }
 
 type CreateArticleForm struct {
@@ -141,6 +143,14 @@ func (c *CreateArticleForm) PubDate() time.Time {
 	return c.createArticleForm.PubDate
 }
 
+func (c *CreateArticleForm) SiteTitle() string {
+	return c.createArticleForm.SiteTitle
+}
+
+func (c *CreateArticleForm) SiteURL() string {
+	return c.createArticleForm.SiteURL
+}
+
 func (c *CreateArticleForm) FieldMap(r *http.Request) binding.FieldMap {
 	return binding.FieldMap{
 		&c.createArticleForm.Title: binding.Field{
@@ -155,6 +165,14 @@ func (c *CreateArticleForm) FieldMap(r *http.Request) binding.FieldMap {
 			Form: "pub_date",
 			Required: true,
 		},
+		&c.createArticleForm.SiteTitle: binding.Field{
+			Form: "site_title",
+			Required: false,
+		},
+		&c.createArticleForm.SiteURL: binding.Field{
+			Form: "site_url",
+			Required: false,
+		},
 	}
 }
 
@@ -162,6 +180,8 @@ const (
 	ErrTitleValidationFailed = "title should be a string"
 	ErrURLValidationFailed = "url should be a url format (http://)"
 	ErrPubDateValidationFailed = "pub_date should be a ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)"
+	ErrSiteTitleValidationFailed = "site_title should be a string"
+	ErrSiteURLValidationFailed = "site_url should be a url format (http://)"
 )
 
 func (c *CreateArticleForm) Validate(r *http.Request) (string, error) {
@@ -178,6 +198,10 @@ func (c *CreateArticleForm) Validate(r *http.Request) (string, error) {
 					msg = ErrURLValidationFailed
 				case "pub_date":
 					msg = ErrPubDateValidationFailed
+				case "site_title":
+					msg = ErrSiteTitleValidationFailed
+				case "site_url":
+					msg = ErrSiteURLValidationFailed
 				}
 			}
 			return msg, xerrors.Errorf("failed to bind request params: %w", e)
@@ -198,6 +222,10 @@ func (c *CreateArticleForm) Validate(r *http.Request) (string, error) {
 				msg = ErrURLValidationFailed
 			case "PubDate":
 				msg = ErrPubDateValidationFailed
+			case "SiteTitle":
+				msg = ErrSiteTitleValidationFailed
+			case "SiteURL":
+				msg = ErrSiteURLValidationFailed
 			}
 		}
 

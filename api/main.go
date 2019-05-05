@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/kentaro-m/spider/api/article"
 	"github.com/kentaro-m/spider/api/driver"
+	"github.com/kentaro-m/spider/api/site"
 	"golang.org/x/xerrors"
 	"log"
 	"os"
@@ -80,7 +81,8 @@ func main() {
 	}
 
 	articleRepository := article.NewArticleRepository(connection)
-	articleModel := article.NewArticleModel(articleRepository)
+	siteRepository := site.NewSiteRepository(connection)
+	articleModel := article.NewArticleModel(articleRepository, siteRepository)
 	articleHandler := article.NewArticleHandler(articleModel)
 
 	r := chi.NewRouter()
