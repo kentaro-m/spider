@@ -3,7 +3,9 @@ package article
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"golang.org/x/xerrors"
+	"time"
 )
 
 func NewArticleRepository(Conn *sql.DB) ArticleRepository {
@@ -13,10 +15,10 @@ func NewArticleRepository(Conn *sql.DB) ArticleRepository {
 }
 
 type ArticleRepository interface {
-	GetNewArticles(ctx context.Context, g *GetArticleForm) ([]*Article, error)
-	GetArticlesBySince(ctx context.Context, g *GetArticleForm) ([]*Article, error)
-	GetArticlesByUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error)
-	GetArticlesBySinceAndUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error)
+	GetNewArticles(ctx context.Context, g *GetArticleForm) ([]*Item, error)
+	GetArticlesBySince(ctx context.Context, g *GetArticleForm) ([]*Item, error)
+	GetArticlesByUntil(ctx context.Context, g *GetArticleForm) ([]*Item, error)
+	GetArticlesBySinceAndUntil(ctx context.Context, g *GetArticleForm) ([]*Item, error)
 	Create(ctx context.Context, a *Article) error
 }
 
@@ -24,11 +26,32 @@ type articleRepository struct {
 	Conn *sql.DB
 }
 
-func (ar articleRepository) GetNewArticles(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	query := "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date DESC LIMIT ?"
+type Item struct {
+	ID        	string    `json:"id" example:"faf9c3a7-b3ee-441f-baec-a5b668948381"`
+	Title     	string    `json:"title" example:"AWS CDKでサーバーレスアプリケーションのデプロイを試す"`
+	URL       	string    `json:"url" example:"https://blog.kentarom.com/learn-aws-cdk/"`
+	PubDate   	time.Time `json:"pub_date" example:"2019-01-19T14:13:01Z"`
+	SiteTitle   string    `json:"site_title" example:"AWS CDKでサーバーレスアプリケーションのデプロイを試す"`
+	SiteURL     string    `json:"site_url" example:"https://blog.kentarom.com/learn-aws-cdk/"`
+}
+
+func (ar articleRepository) GetNewArticles(ctx context.Context, g *GetArticleForm) ([]*Item, error) {
+	query := fmt.Sprintf(`
+		SELECT a.id, a.title, a.url, a.pub_date, s.title AS site_title, s.url AS site_url
+		FROM articles AS a
+		LEFT OUTER JOIN sites AS s ON a.site_id = s.id
+		ORDER BY pub_date DESC
+		LIMIT ?
+	`)
 
 	if g.Sort() == "asc" {
-		query = "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles ORDER BY pub_date ASC LIMIT ?"
+		query = fmt.Sprintf(`
+			SELECT a.id, a.title, a.url, a.pub_date, s.title AS site_title, s.url AS site_url
+			FROM articles AS a
+			LEFT OUTER JOIN sites AS s ON a.site_id = s.id
+			ORDER BY pub_date ASC
+			LIMIT ?
+		`)
 	}
 
 	rows, err := ar.Conn.QueryContext(ctx, query, g.Limit())
@@ -45,16 +68,16 @@ func (ar articleRepository) GetNewArticles(ctx context.Context, g *GetArticleFor
 		}
 	}()
 
-	payload := make([]*Article, 0)
+	payload := make([]*Item, 0)
 	for rows.Next() {
-		data := new(Article)
+		data := new(Item)
 		err := rows.Scan(
-			&data.article.ID,
-			&data.article.Title,
-			&data.article.URL,
-			&data.article.PubDate,
-			&data.article.CreatedAt,
-			&data.article.UpdatedAt,
+			&data.ID,
+			&data.Title,
+			&data.URL,
+			&data.PubDate,
+			&data.SiteTitle,
+			&data.SiteURL,
 		)
 
 		if err != nil {
@@ -67,11 +90,25 @@ func (ar articleRepository) GetNewArticles(ctx context.Context, g *GetArticleFor
 	return payload, err
 }
 
-func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	query := "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date DESC LIMIT ?"
+func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *GetArticleForm) ([]*Item, error) {
+	query := fmt.Sprintf(`
+		SELECT a.id, a.title, a.url, a.pub_date, s.title AS site_title, s.url AS site_url
+		FROM articles AS a
+		LEFT OUTER JOIN sites AS s ON a.site_id = s.id
+		WHERE pub_date >= ?
+		ORDER BY pub_date DESC
+		LIMIT ?
+	`)
 
 	if g.Sort() == "asc" {
-		query = "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? ORDER BY pub_date ASC LIMIT ?"
+		query = fmt.Sprintf(`
+			SELECT a.id, a.title, a.url, a.pub_date, s.title AS site_title, s.url AS site_url
+			FROM articles AS a
+			LEFT OUTER JOIN sites AS s ON a.site_id = s.id
+			WHERE pub_date >= ?
+			ORDER BY pub_date ASC
+			LIMIT ?
+		`)
 	}
 
 	rows, err := ar.Conn.QueryContext(ctx, query, g.Since().Format("2006-01-02 15:04:05"), g.Limit())
@@ -88,16 +125,16 @@ func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *GetArticl
 		}
 	}()
 
-	payload := make([]*Article, 0)
+	payload := make([]*Item, 0)
 	for rows.Next() {
-		data := new(Article)
+		data := new(Item)
 		err := rows.Scan(
-			&data.article.ID,
-			&data.article.Title,
-			&data.article.URL,
-			&data.article.PubDate,
-			&data.article.CreatedAt,
-			&data.article.UpdatedAt,
+			&data.ID,
+			&data.Title,
+			&data.URL,
+			&data.PubDate,
+			&data.SiteTitle,
+			&data.SiteURL,
 		)
 
 		if err != nil {
@@ -110,11 +147,25 @@ func (ar articleRepository) GetArticlesBySince(ctx context.Context, g *GetArticl
 	return payload, err
 }
 
-func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	query := "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
+func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *GetArticleForm) ([]*Item, error) {
+	query := fmt.Sprintf(`
+		SELECT a.id, a.title, a.url, a.pub_date, s.title AS site_title, s.url AS site_url
+		FROM articles AS a
+		LEFT OUTER JOIN sites AS s ON a.site_id = s.id
+		WHERE pub_date <= ?
+		ORDER BY pub_date DESC
+		LIMIT ?
+	`)
 
 	if g.Sort() == "asc" {
-		query = "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date <= ? ORDER BY pub_date ASC LIMIT ?"
+		query = fmt.Sprintf(`
+			SELECT a.id, a.title, a.url, a.pub_date, s.title AS site_title, s.url AS site_url
+			FROM articles AS a
+			LEFT OUTER JOIN sites AS s ON a.site_id = s.id
+			WHERE pub_date <= ?
+			ORDER BY pub_date ASC
+			LIMIT ?
+		`)
 	}
 
 	rows, err := ar.Conn.QueryContext(ctx, query, g.Until().Format("2006-01-02 15:04:05"), g.Limit())
@@ -131,16 +182,16 @@ func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *GetArticl
 		}
 	}()
 
-	payload := make([]*Article, 0)
+	payload := make([]*Item, 0)
 	for rows.Next() {
-		data := new(Article)
+		data := new(Item)
 		err := rows.Scan(
-			&data.article.ID,
-			&data.article.Title,
-			&data.article.URL,
-			&data.article.PubDate,
-			&data.article.CreatedAt,
-			&data.article.UpdatedAt,
+			&data.ID,
+			&data.Title,
+			&data.URL,
+			&data.PubDate,
+			&data.SiteTitle,
+			&data.SiteURL,
 		)
 
 		if err != nil {
@@ -153,11 +204,25 @@ func (ar articleRepository) GetArticlesByUntil(ctx context.Context, g *GetArticl
 	return payload, err
 }
 
-func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *GetArticleForm) ([]*Article, error) {
-	query := "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date DESC LIMIT ?"
+func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *GetArticleForm) ([]*Item, error) {
+	query := fmt.Sprintf(`
+		SELECT a.id, a.title, a.url, a.pub_date, s.title AS site_title, s.url AS site_url
+		FROM articles AS a
+		LEFT OUTER JOIN sites AS s ON a.site_id = s.id
+		WHERE pub_date >= ? AND pub_date <= ?
+		ORDER BY pub_date DESC
+		LIMIT ?
+	`)
 
 	if g.Sort() == "asc" {
-		query = "SELECT ID, title, url, pub_date, created_at, updated_at FROM articles WHERE pub_date >= ? AND pub_date <= ? ORDER BY pub_date ASC LIMIT ?"
+		query = fmt.Sprintf(`
+			SELECT a.id, a.title, a.url, a.pub_date, s.title AS site_title, s.url AS site_url
+			FROM articles AS a
+			LEFT OUTER JOIN sites AS s ON a.site_id = s.id
+			WHERE pub_date >= ? AND pub_date <= ?
+			ORDER BY pub_date ASC
+			LIMIT ?
+		`)
 	}
 
 	rows, err := ar.Conn.QueryContext(ctx, query, g.Since().Format("2006-01-02 15:04:05"), g.Until().Format("2006-01-02 15:04:05"), g.Limit())
@@ -174,16 +239,16 @@ func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *G
 		}
 	}()
 
-	payload := make([]*Article, 0)
+	payload := make([]*Item, 0)
 	for rows.Next() {
-		data := new(Article)
+		data := new(Item)
 		err := rows.Scan(
-			&data.article.ID,
-			&data.article.Title,
-			&data.article.URL,
-			&data.article.PubDate,
-			&data.article.CreatedAt,
-			&data.article.UpdatedAt,
+			&data.ID,
+			&data.Title,
+			&data.URL,
+			&data.PubDate,
+			&data.SiteTitle,
+			&data.SiteURL,
 		)
 
 		if err != nil {
@@ -197,7 +262,10 @@ func (ar articleRepository) GetArticlesBySinceAndUntil(ctx context.Context, g *G
 }
 
 func (ar *articleRepository) Create(ctx context.Context, a *Article) error {
-	query := "INSERT INTO articles SET ID = ?, title = ?, url = ?, pub_date = ?, created_at = ?, updated_at = ?"
+	query := fmt.Sprintf(`
+		INSERT INTO articles
+		SET ID = ?, title = ?, url = ?, pub_date = ?, site_id = ?, created_at = ?, updated_at = ?
+	`)
 
 	stmt, err := ar.Conn.PrepareContext(ctx, query)
 
@@ -205,7 +273,7 @@ func (ar *articleRepository) Create(ctx context.Context, a *Article) error {
 		return xerrors.Errorf("failed to create a prepared statement: %w", err)
 	}
 
-	_, err = stmt.ExecContext(ctx, a.ID(), a.Title(), a.URL(), a.PubDate().Format("2006-01-02 15:04:05"), a.CreatedAt().Format("2006-01-02 15:04:05"), a.UpdatedAt().Format("2006-01-02 15:04:05"))
+	_, err = stmt.ExecContext(ctx, a.ID(), a.Title(), a.URL(), a.PubDate().Format("2006-01-02 15:04:05"), a.SiteID(), a.CreatedAt().Format("2006-01-02 15:04:05"), a.UpdatedAt().Format("2006-01-02 15:04:05"))
 
 	if err != nil {
 		return xerrors.Errorf("failed to execute a prepared statement: %w", err)
